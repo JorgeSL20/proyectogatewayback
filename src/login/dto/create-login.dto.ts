@@ -1,4 +1,6 @@
 export class CreateLoginDto {
     email: string
-    contrasena: string
+    password: string
+    ip:string
+    fecha:string
 }

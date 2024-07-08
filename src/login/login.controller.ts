@@ -14,8 +14,10 @@ export class LoginController {
 
   @Post()
   async validLogin(@Body() createLoginDto: CreateLoginDto) {
+    console.log(createLoginDto.password)
     try 
     {
+      console.log("entra")
       const datos = await this.userService.getUser(createLoginDto.email)
       if(datos === null) throw new Error("error")
 
@@ -29,13 +31,14 @@ export class LoginController {
       else
       {
         this.intento++;
-        this.loginService.asignarIntentos(datos.id_usuario,this.intento)
+        this.loginService.asignarIntentos(datos.id,this.intento)
           if(this.intento >= 5)
           {
             console.log("la de abajo")
-            this.loginService.resetearIntentos(datos.id_usuario)
+            this.loginService.resetearIntentos(datos.id)
+            this.loginService.crearLogs({accion:'Sesion bloqueada',fecha:createLoginDto.fecha,ip:createLoginDto.ip,status:409,url:'/login'},datos.email)
             return {
-                  message: 'Numero de maxinmo de intentos alcanzado',
+                  message: 'Numero de maxinmo de intentos',
                   status: HttpStatus.CONFLICT,
                   nIntentos: this.intento
                 }
@@ -45,11 +48,12 @@ export class LoginController {
             const data = this.loginService.validLogin(createLoginDto);
             if((await data) === true)
             {
-              this.loginService.resetearIntentos(datos.id_usuario)
+              this.loginService.resetearIntentos(datos.id)
+              this.loginService.crearLogs({accion:'Inicio de sesion',fecha:createLoginDto.fecha,ip:createLoginDto.ip,status:200,url:'/login'},datos.email)
               return {
                     message: 'Login correcto',
                     status: 200,
-
+                    token: datos.id
                   } 
             }
             else
@@ -60,7 +64,10 @@ export class LoginController {
           }
       }
     } catch (error) {
-      throw new HttpException("El correo no existe", HttpStatus.FOUND);
+      return {
+        message: 'Correo Invalido',
+        status: 302
+      }
     }
   }
 

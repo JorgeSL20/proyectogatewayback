@@ -8,33 +8,34 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service:'gmail',
+      service: 'gmail',
       auth: {
-        user: 'carlosmeyer528@gmail.com',
-        pass: 'etoq ssof sfer mhka',
+        user: 'kireluriel@gmail.com',
+        pass: 'djcy yydq hmxs ojuq',
       },
-    });}
-    async sendMail(userData: SendEmailDto, code: string): Promise<void> {
-      const mailOptions: nodemailer.SendMailOptions = {
-        from: '"Dental Crown"',
-        to: userData.to,
-        subject: 'Código de Acceso para Dental Crown',
-        html: `
-          <img src="https://github.com/CarlosMeyer400400/Cifrado-de-Transposici-n-en-Vue-y-la-libreria-crypto-js/blob/main/logosinfondo.png?raw=true" alt="Dental Crown Logo" width="150">
-          <h1>¡Bienvenido a Dental Crown!</h1>
-          <p>Hola,</p>
-          <p>Aquí tienes tu código de acceso único:</p>
-          <h2 style="background-color: #f0f0f0; padding: 10px;">${code}</h2>
-          <p>Por favor, asegúrate de utilizar este código dentro de los próximos 3 minutos.</p>
-          <p>Si tú no has intentado recuperar tu contraseña ignora este correo.</p>
-          <p>Gracias por confiar en Dental Crown para tus necesidades dentales.</p>
-          <p>Atentamente,<br>El equipo de Dental Crown</p>
-        `,
-      };
-    
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('Message sent: %s', info.messageId);
-    }
+    });
+  }
+  async sendMail(userData: SendEmailDto, code: string): Promise<void> {
+    const mailOptions: nodemailer.SendMailOptions = {
+      from: '"Gateway Soluciones en TI"',
+      to: userData.to,
+      subject: 'Codigo de Recuperación de Contraseña',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; text-align: center;">
+          <h2 style="color: #333;">¡Recuperación de Contraseña!</h2>
+          <p>Estimado Usuario,</p>
+          <p>Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta. Utiliza el siguiente código para completar el proceso:</p>
+          <h3 style="color: #007BFF;">Código de Verificación: ${code}</h3>
+          <p>Este código es válido por un tiempo limitado. No lo compartas con nadie.</p>
+          <p>Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje.</p>
+          <p>Gracias,</p>
+        </div>
+      `,
+    };
+
+    const info = await this.transporter.sendMail(mailOptions);
+    console.log('Message sent: %s', info.messageId);
+  }
     
     
 

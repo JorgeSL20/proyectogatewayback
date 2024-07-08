@@ -1,14 +1,24 @@
 export class CreateAuthDto {
-    id_usuario:number
-    nombre:string
-    email:string
-    apellidop:string
-    apellidom:string
-    sexo:string
-    fecha?:Date | null;
-    nombreu:string
-    contrasena:string
-    telefono: string
-    pregunta:string
-    respuesta:string
+    id: number;
+    name: string;
+    email: string;
+    lastNameP: string;
+    lastNameM: string;
+    password: string;
+    pregunta: string;
+    respuesta: string;
+    ip:string;
+    fecha_log?:string;
+}
+
+export class CreateInformacionDto{
+    id_informacion: number;
+    quienessomos: string;
+    vision: string;
+    mision: string;
+}
+
+export class CreatePreguntasDto{  
+    preguntas: string;
+    respuestas: string;
 }
