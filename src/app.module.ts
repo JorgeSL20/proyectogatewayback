@@ -12,11 +12,11 @@ import { ProductoModule } from './producto/producto.module';
   imports: [
     TypeOrmModule.forRoot({
     type: 'mysql',
-    host: 'localhost',//roundhouse.proxy.rlwy.net
-    port: 3306,
+    host: 'roundhouse.proxy.rlwy.net',//roundhouse.proxy.rlwy.net
+    port: 19513,
     username: 'root',
-    password: '',
-    database: 'db_gateway',
+    password: 'lHluoAmqEbVXpvUXCDeiCLbtNvHTQLon',
+    database: 'railway',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
   }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule],
