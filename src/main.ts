@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const CorsOptions: CorsOptions = {
-    origin:[ 'https://proyectoclinicaback-back-production.up.railway.app','https://clincicadental.netlify.app', 'http://localhost:4200'],
+    origin:[ 'http://back-production.up.railway.app','', 'http://localhost:4200'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: false,
   }
