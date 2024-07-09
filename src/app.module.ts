@@ -10,6 +10,7 @@ import { ProductoModule } from './producto/producto.module';
 import { MarcaModule } from './marca/marca.module';
 import { CategoriaModule } from './categoria/categoria.module';
 
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
