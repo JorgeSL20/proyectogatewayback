@@ -8,7 +8,7 @@ import { LoginModule } from './login/login.module';
 import { RecuperarPassModule } from './recuperar-pass/recuperar-pass.module';
 import { ProductoModule } from './producto/producto.module';
 import { MarcaModule } from './marca/marca.module';
-import { Categoria } from './categoria/entities/categoria.entity';
+import { CategoriaModule } from './categoria/categoria.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { Categoria } from './categoria/entities/categoria.entity';
     database: 'railway',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, Categoria],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule],
   controllers: [AppController],
   providers: [AppService],
 })
