@@ -15,10 +15,10 @@ import { CategoriaModule } from './categoria/categoria.module';
   imports: [
     TypeOrmModule.forRoot({
     type: 'mysql',
-    host: 'roundhouse.proxy.rlwy.net',//roundhouse.proxy.rlwy.net
-    port: 19513,
+    host: 'viaduct.proxy.rlwy.net',//roundhouse.proxy.rlwy.net
+    port: 24988,
     username: 'root',
-    password: 'lHluoAmqEbVXpvUXCDeiCLbtNvHTQLon',
+    password: 'IuTDjpowqiGeIqaxVzBVRAJCmfcmkYPk',
     database: 'railway',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
@@ -26,5 +26,8 @@ import { CategoriaModule } from './categoria/categoria.module';
   controllers: [AppController],
   providers: [AppService],
 })
+
+
+
 export class AppModule {}
  
