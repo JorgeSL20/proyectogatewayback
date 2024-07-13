@@ -6,12 +6,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const CorsOptions: CorsOptions = {
-    origin:[ 'https://proyectogatewayback-production.up.railway.app','https://main--gatewaysoluciones.netlify.app', 'http://localhost:4200'],
+    origin:[ 'https://proyectogatewayback-production.up.railway.app','https://gateway-soluciones.netlify.app', 'http://localhost:4200'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: false,
   }
 
-  
+
   app.enableCors(CorsOptions);
 
   await app.listen( process.env.PORT || 3000 );
