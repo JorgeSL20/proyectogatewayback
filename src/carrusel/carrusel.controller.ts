@@ -3,7 +3,6 @@ import { CarruselService } from './carrusel.service';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-
 @Controller('carrusel')
 export class CarruselController {
   constructor(private readonly carruselService: CarruselService) {}
