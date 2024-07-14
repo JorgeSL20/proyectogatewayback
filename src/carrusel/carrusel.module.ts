@@ -1,6 +1,7 @@
+// src/carrusel/carrusel.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Carrusel } from '../carrusel/entities/carrusel.entity';
+import { Carrusel } from './entities/carrusel.entity';
 import { CarruselController } from './carrusel.controller';
 import { CarruselService } from './carrusel.service';
 import { MulterModule } from '@nestjs/platform-express';

@@ -1,3 +1,4 @@
+// src/carrusel/entities/carrusel.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'carruseles' })
@@ -10,6 +11,4 @@ export class Carrusel {
 
   @Column()
   publicId: string;
-
-  // Puedes agregar más propiedades según sea necesario
 }

@@ -1,14 +1,15 @@
+// src/carrusel/carrusel.service.ts
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Carrusel } from '../carrusel/entities/carrusel.entity';
+import { Carrusel } from './entities/carrusel.entity';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({
-  cloud_name: 'dkwb9vcbb',
-  api_key: '724994365615579',
-  api_secret: 'KXXzGbwWPb6-j5Cpfpxx6P1SvDA',
+  cloud_name: 'dtma1qalx',
+  api_key: '437213717654526',
+  api_secret: 'fCn9EbX6KWqI1WZZ_aTOWgv986g',
 });
 
 @Injectable()

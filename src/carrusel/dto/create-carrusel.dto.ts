@@ -1,6 +1,6 @@
+// src/carrusel/dto/create-carrusel.dto.ts
 export class CreateCarruselDto {
     url: string;
     publicId: string;
-    // Puedes agregar más propiedades según sea necesario
   }
   

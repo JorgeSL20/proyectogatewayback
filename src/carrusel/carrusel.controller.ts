@@ -1,3 +1,4 @@
+// src/carrusel/carrusel.controller.ts
 import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CarruselService } from './carrusel.service';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
