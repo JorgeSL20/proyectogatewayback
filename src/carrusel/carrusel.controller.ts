@@ -1,5 +1,4 @@
-// src/carrusel/carrusel.controller.ts
-import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { CarruselService } from './carrusel.service';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -9,8 +8,11 @@ export class CarruselController {
   constructor(private readonly carruselService: CarruselService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file')) // Asegúrate de que 'file' coincide con el nombre del campo en el formulario HTML
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
     const result = await this.carruselService.uploadImage(file);
     const createCarruselDto: CreateCarruselDto = {
       url: result.secure_url,

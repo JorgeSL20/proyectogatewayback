@@ -1,4 +1,3 @@
-// src/carrusel/carrusel.service.ts
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,9 +19,14 @@ export class CarruselService {
   ) {}
 
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    console.log('Iniciando subida de imagen...');
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream((error, result) => {
-        if (error) return reject(error);
+        if (error) {
+          console.error('Error al subir imagen:', error);
+          return reject(error);
+        }
+        console.log('Imagen subida con éxito:', result);
         resolve(result);
       }).end(file.buffer);
     });

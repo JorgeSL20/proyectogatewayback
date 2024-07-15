@@ -1,4 +1,3 @@
-// src/carrusel/carrusel.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Carrusel } from './entities/carrusel.entity';
@@ -10,7 +9,7 @@ import { MulterModule } from '@nestjs/platform-express';
   imports: [
     TypeOrmModule.forFeature([Carrusel]),
     MulterModule.register({
-      dest: './uploads', // Directorio donde se almacenarán los archivos subidos
+      dest: './uploads', // Directorio donde se almacenarán los archivos subidos (puedes cambiar esto si no lo necesitas)
     }),
   ],
   controllers: [CarruselController],
