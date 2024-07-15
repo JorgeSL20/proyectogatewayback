@@ -8,7 +8,7 @@ export class CarruselController {
   constructor(private readonly carruselService: CarruselService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file')) // Asegúrate de que 'file' coincide con el nombre del campo en el formulario HTML
+  @UseInterceptors(FileInterceptor('file'))
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file uploaded');

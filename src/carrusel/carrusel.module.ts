@@ -9,7 +9,7 @@ import { MulterModule } from '@nestjs/platform-express';
   imports: [
     TypeOrmModule.forFeature([Carrusel]),
     MulterModule.register({
-      dest: './uploads', // Directorio donde se almacenarán los archivos subidos (puedes cambiar esto si no lo necesitas)
+      dest: './uploads', // Directorio donde se almacenarán los archivos subidos
     }),
   ],
   controllers: [CarruselController],
