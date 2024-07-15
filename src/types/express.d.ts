@@ -1,6 +1,13 @@
-// express.d.ts
+// types/express.d.ts
 
-declare namespace Express {
+import { Request } from 'express';
+
+declare global {
+  namespace Express {
+    interface Request {
+      file: MulterFile;
+    }
+
     interface MulterFile {
       fieldname: string;
       originalname: string;
@@ -13,4 +20,4 @@ declare namespace Express {
       buffer: Buffer;
     }
   }
-  
+}

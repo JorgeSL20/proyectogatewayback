@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Carrusel } from './entities/carrusel.entity';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+import { Express } from 'express';
 
 cloudinary.config({
   cloud_name: 'dkwb9vcbb',
@@ -18,17 +19,18 @@ export class CarruselService {
     private carruselRepository: Repository<Carrusel>,
   ) {}
 
-  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
-    console.log('Iniciando subida de imagen...');
+  async uploadImage(file: Express.MulterFile): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream((error, result) => {
-        if (error) {
-          console.error('Error al subir imagen:', error);
-          return reject(error);
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'carrusel_images', // Asegúrate de especificar el folder aquí
+          upload_preset: 'carrusel_preset', // Asegúrate de tener el preset configurado en Cloudinary
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
         }
-        console.log('Imagen subida con éxito:', result);
-        resolve(result);
-      }).end(file.buffer);
+      ).end(file.buffer);
     });
   }
 

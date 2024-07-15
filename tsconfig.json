@@ -19,7 +19,8 @@
     "strictNullChecks": false,
     "noFallthroughCasesInSwitch": false,
     "strictBindCallApply": false,
-    "types": ["node", "express", "multer"]  // Asegúrate de incluir multer aquí
+    "types": ["node", "express", "multer"],
+    "typeRoots": ["node_modules/@types", "types"]
   },
   "include": [
     "src"
