@@ -23,8 +23,8 @@ export class CarruselService {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'carrusel_images', // Asegúrate de especificar el folder aquí
-          upload_preset: 'carrusel_preset', // Asegúrate de tener el preset configurado en Cloudinary
+          folder: 'carrusel_images',
+          upload_preset: 'carrusel_preset',
         },
         (error, result) => {
           if (error) return reject(error);
