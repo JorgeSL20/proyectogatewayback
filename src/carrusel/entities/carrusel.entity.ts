@@ -1,7 +1,7 @@
 // src/carrusel/entities/carrusel.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'carruseles' })
+@Entity({ name: 'carrusel' })
 export class Carrusel {
   @PrimaryGeneratedColumn()
   id: number;

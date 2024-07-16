@@ -24,7 +24,6 @@ export class CarruselService {
       cloudinary.uploader.upload_stream(
         {
           folder: 'carrusel_images',
-          upload_preset: 'carrusel_preset',
         },
         (error, result) => {
           if (error) return reject(error);
