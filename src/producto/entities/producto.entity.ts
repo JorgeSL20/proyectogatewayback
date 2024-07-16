@@ -6,7 +6,10 @@ export class Producto {
     id: number;
 
     @Column()
-    imagenP: string;
+    url: string;
+
+    @Column()
+    publicId: string;
 
     @Column()
     producto: string;
