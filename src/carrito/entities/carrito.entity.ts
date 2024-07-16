@@ -3,7 +3,7 @@ import { Auth } from 'src/auth/entities/auth.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
 
 @Entity()
-export class CarritoItem {
+export class Carrito{
   @PrimaryGeneratedColumn()
   id: number;
 
