@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete } from '@nestjs/common'; // Asegúrate de importar Param desde '@nestjs/common'
 import { CarritoService } from './carrito.service';
 import { Auth } from 'src/auth/entities/auth.entity';
-import { Producto } from 'src/producto/entities/producto.entity';
 
 @Controller('carrito')
 export class CarritoController {
@@ -12,16 +11,15 @@ export class CarritoController {
     return this.carritoService.agregarItem(agregarItemDto);
   }
 
-  @Get(':usuarioId')
-  async obtenerItemsCarrito(@Param('usuarioId') usuarioId: string) {
+  @Post('obtener')
+  async obtenerItemsCarrito(@Body('usuarioId') usuarioId: number) {
     const usuario = new Auth();
-    usuario.id = parseInt(usuarioId, 10);
+    usuario.id = usuarioId;
     return this.carritoService.obtenerItemsCarrito(usuario);
   }
 
   @Delete('eliminar/:id')
-  async eliminarItem(@Param('id') id: string) {
+  async eliminarItem(@Param('id') id: string) { // Aquí se utiliza el decorador @Param correctamente
     return this.carritoService.eliminarItem(parseInt(id, 10));
   }
 }
-
