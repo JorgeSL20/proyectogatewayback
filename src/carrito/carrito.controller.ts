@@ -8,12 +8,8 @@ export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
   @Post('agregar')
-  async agregarItem(
-    @Body('usuario') usuario: Auth,
-    @Body('producto') producto: Producto,
-    @Body('cantidad') cantidad: number,
-  ) {
-    return this.carritoService.agregarItem(usuario, producto, cantidad);
+  async agregarItem(@Body() agregarItemDto: { usuarioId: number; productoId: number; cantidad: number }) {
+    return this.carritoService.agregarItem(agregarItemDto);
   }
 
   @Get(':usuarioId')
@@ -28,3 +24,4 @@ export class CarritoController {
     return this.carritoService.eliminarItem(parseInt(id, 10));
   }
 }
+

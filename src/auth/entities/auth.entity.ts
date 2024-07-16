@@ -33,8 +33,8 @@ export class Auth {
     @OneToMany(() => Logs, logs => logs.usuario)
     logs:Logs[];
     
-    @OneToMany(() => Carrito, carritoItem => carritoItem.usuario)
-  carritoItems: Carrito[];
+    @OneToMany(() => Carrito, carrito => carrito.usuario)
+  carritos: Carrito[];
 }
 
 @Entity({ name: 'informacion' })
