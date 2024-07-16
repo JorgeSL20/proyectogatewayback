@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CarritoItem } from './entities/carrito.entity';
+import { Carrito } from './entities/carrito.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
 
 @Injectable()
 export class CarritoService {
   constructor(
-    @InjectRepository(CarritoItem)
-    private carritoRepository: Repository<CarritoItem>,
+    @InjectRepository(Carrito)
+    private carritoRepository: Repository<Carrito>,
   ) {}
 
-  async agregarItem(usuario: Auth, producto: Producto, cantidad: number): Promise<CarritoItem> {
-    const carritoItem = new CarritoItem();
+  async agregarItem(usuario: Auth, producto: Producto, cantidad: number): Promise<Carrito> {
+    const carritoItem = new Carrito();
     carritoItem.usuario = usuario;
     carritoItem.producto = producto;
     carritoItem.cantidad = cantidad;
     return this.carritoRepository.save(carritoItem);
   }
 
-  async obtenerItemsCarrito(usuario: Auth): Promise<CarritoItem[]> {
+  async obtenerItemsCarrito(usuario: Auth): Promise<Carrito[]> {
     return this.carritoRepository.find({ where: { usuario } });
   }
 
