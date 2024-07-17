@@ -27,6 +27,6 @@ export class Producto {
     @Column()
     existencias: number;
 
-    @OneToMany(() => Carrito, carrito => carrito.producto)
+    @OneToMany(() => Carrito, carrito => carrito.productoId)
     carritos: Carrito[];
 }

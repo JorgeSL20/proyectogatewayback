@@ -29,8 +29,8 @@ export class CarritoService {
     }
 
     const newCarrito = this.carritoRepository.create({
-      usuario: usuario,
-      producto: producto,
+      usuarioId: usuario,
+      productoId: producto,
       cantidad: crearCarritoDto.cantidad,
     });
 
@@ -46,13 +46,13 @@ export class CarritoService {
   }
 
   async findAll() {
-    return this.carritoRepository.find();
+    return this.carritoRepository.find({ relations: ['usuario', 'producto'] });
   }
 
   async findByUsuarioId(usuarioId: number) {
     return this.carritoRepository.find({
-      where: { usuario: { id: usuarioId } },
-      relations: ['usuario', 'producto'], // Asegúrate de incluir las relaciones necesarias
+      where: { usuarioId: { id: usuarioId } },
+      relations: ['usuario', 'producto'],
     });
   }
 }
