@@ -10,9 +10,6 @@ export class Producto {
     url: string;
 
     @Column()
-    publicId: string;
-
-    @Column()
     producto: string;
 
     @Column()

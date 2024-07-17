@@ -1,7 +1,6 @@
 export class CreateProductoDto {
     id: number;
     url: string;
-    publicId: string;
     producto: string;
     categoria: string;
     marca: string;
@@ -9,4 +8,3 @@ export class CreateProductoDto {
     precio: number;
     existencias: number;
 }
-// xd

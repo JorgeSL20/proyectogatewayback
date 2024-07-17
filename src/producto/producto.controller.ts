@@ -16,7 +16,6 @@ export class ProductoController {
     console.log('CreateProductoDto:', createProductoDto); // Log para verificar datos
     const result = await this.productoService.uploadImage(file);
     createProductoDto.url = result.secure_url;
-    createProductoDto.publicId = result.public_id;
     return this.productoService.create(createProductoDto);
   }
 

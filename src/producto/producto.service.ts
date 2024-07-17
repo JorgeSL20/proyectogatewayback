@@ -1,19 +1,10 @@
-// src/producto/producto.service.ts
-import { Injectable, BadRequestException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Producto } from './entities/producto.entity';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { Express } from 'express';
-
-
-cloudinary.config({
-  cloud_name: 'dkwb9vcbb',
-  api_key: '724994365615579',
-  api_secret: 'KXXzGbwWPb6-j5Cpfpxx6P1SvDA',
-});
 
 @Injectable()
 export class ProductoService {
@@ -58,4 +49,3 @@ export class ProductoService {
     };
   }
 }
-
