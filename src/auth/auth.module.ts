@@ -9,7 +9,7 @@ import { Logs } from './entities/logs.entity';
   imports: [TypeOrmModule.forFeature([Auth,Informacion,Preguntas,Logs])],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService,TypeOrmModule],
 })
 export class AuthModule {}
  

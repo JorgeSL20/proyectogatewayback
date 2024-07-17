@@ -10,6 +10,8 @@ import { ProductoModule } from './producto/producto.module';
 import { MarcaModule } from './marca/marca.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { CarruselModule } from './carrusel/carrusel.module';
+import { CarritoModule } from './carrito/carrito.module';
+
 
 
 
@@ -24,7 +26,7 @@ import { CarruselModule } from './carrusel/carrusel.module';
     database: 'railway',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule],
   controllers: [AppController],
   providers: [AppService],
 })

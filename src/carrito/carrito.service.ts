@@ -1,18 +1,39 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Carrito } from './entities/carrito.entity';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
+import { Auth } from 'src/auth/entities/auth.entity';
+import { Producto } from 'src/producto/entities/producto.entity';
 
 @Injectable()
 export class CarritoService {
   constructor(
     @InjectRepository(Carrito)
     private carritoRepository: Repository<Carrito>,
+    @InjectRepository(Auth)
+    private authRepository: Repository<Auth>,
+    @InjectRepository(Producto)
+    private productoRepository: Repository<Producto>,
   ) {}
 
   async create(crearCarritoDto: CrearCarritoDto) {
-    const newCarrito = this.carritoRepository.create(crearCarritoDto);
+    const usuario = await this.authRepository.findOne({ where: { id: crearCarritoDto.usuarioId } });
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${crearCarritoDto.usuarioId} no encontrado`);
+    }
+
+    const producto = await this.productoRepository.findOne({ where: { id: crearCarritoDto.productoId } });
+    if (!producto) {
+      throw new NotFoundException(`Producto con ID ${crearCarritoDto.productoId} no encontrado`);
+    }
+
+    const newCarrito = this.carritoRepository.create({
+      usuario: usuario,
+      producto: producto,
+      cantidad: crearCarritoDto.cantidad,
+    });
+
     return this.carritoRepository.save(newCarrito);
   }
 
@@ -29,6 +50,9 @@ export class CarritoService {
   }
 
   async findByUsuarioId(usuarioId: number) {
-    return this.carritoRepository.find({ where: { usuario: { id: usuarioId } } });
+    return this.carritoRepository.find({
+      where: { usuario: { id: usuarioId } },
+      relations: ['usuario', 'producto'], // Asegúrate de incluir las relaciones necesarias
+    });
   }
 }
