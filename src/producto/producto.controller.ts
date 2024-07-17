@@ -1,4 +1,3 @@
-// src/producto/producto.controller.ts
 import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Body } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
@@ -8,9 +7,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ProductoController {
   constructor(private readonly productoService: ProductoService) {}
 
-  @Post('upload')
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @Body() createProductoDto: CreateProductoDto) {
+  async create(@UploadedFile() file: Express.Multer.File, @Body() createProductoDto: CreateProductoDto) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
