@@ -12,12 +12,10 @@ export class CarritoService {
     private carritoRepository: Repository<Carrito>,
   ) {}
 
-  async agregarItem(usuario: Auth, producto: Producto, cantidad: number): Promise<Carrito> {
-    const carritoItem = new Carrito();
-    carritoItem.usuario = usuario;
-    carritoItem.producto = producto;
-    carritoItem.cantidad = cantidad;
-    return this.carritoRepository.save(carritoItem);
+  async agregarItem(agregarItemDto: { usuarioId: number; productoId: number; cantidad: number }) {
+    const carritoItem = this.carritoRepository.create(agregarItemDto);
+    await this.carritoRepository.save(carritoItem);
+    return { message: 'Producto agregado al carrito con éxito' };
   }
 
   async obtenerItemsCarrito(usuario: Auth): Promise<Carrito[]> {
