@@ -9,3 +9,4 @@ export class CreateProductoDto {
     precio: number;
     existencias: number;
 }
+// xd
