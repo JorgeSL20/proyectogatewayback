@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Carrito } from './entities/carrito.entity';
-import { Auth } from 'src/auth/entities/auth.entity'; // Asegúrate de importar correctamente la entidad Auth si no lo has hecho
+import { CrearCarritoDto } from './dto/create-carrito.dto';
 
 @Injectable()
 export class CarritoService {
@@ -11,19 +11,24 @@ export class CarritoService {
     private carritoRepository: Repository<Carrito>,
   ) {}
 
-  async agregarItem(agregarItemDto: { usuarioId: number; productoId: number; cantidad: number }) {
-    // Implementa la lógica para agregar un item al carrito
+  async create(crearCarritoDto: CrearCarritoDto) {
+    const newCarrito = this.carritoRepository.create(crearCarritoDto);
+    return this.carritoRepository.save(newCarrito);
   }
 
-  async obtenerItemsCarrito(usuario: Auth): Promise<Carrito[]> {
-    return this.carritoRepository.find({ where: { usuario } });
-  }
-
-  async mostrarTodo(): Promise<Carrito[]> {
-    return this.carritoRepository.find(); // Retorna todos los elementos del carrito
-  }
-
-  async eliminarItem(id: number): Promise<void> {
+  async remove(id: number) {
     await this.carritoRepository.delete(id);
+    return {
+      message: 'Item del carrito eliminado correctamente',
+      status: HttpStatus.OK,
+    };
+  }
+
+  async findAll() {
+    return this.carritoRepository.find();
+  }
+
+  async findByUsuarioId(usuarioId: number) {
+    return this.carritoRepository.find({ where: { usuario: { id: usuarioId } } });
   }
 }
