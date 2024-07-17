@@ -8,10 +8,10 @@ export class Carrito {
   id: number;
 
   @ManyToOne(() => Auth, auth => auth.carritos)
-  usuarioId: Auth;
+  usuario: Auth;
 
   @ManyToOne(() => Producto, producto => producto.carritos)
-  productoId: Producto;
+  producto: Producto;
 
   @Column()
   cantidad: number;

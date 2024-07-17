@@ -33,7 +33,7 @@ export class Auth {
     @OneToMany(() => Logs, logs => logs.usuario)
     logs:Logs[];
     
-    @OneToMany(() => Carrito, carrito => carrito.usuarioId)
+    @OneToMany(() => Carrito, carrito => carrito.usuario)
   carritos: Carrito[];
 }
 
