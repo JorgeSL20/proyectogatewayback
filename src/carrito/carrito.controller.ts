@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 
@@ -6,25 +6,24 @@ import { CrearCarritoDto } from './dto/create-carrito.dto';
 export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
-  @Post()
-  create(@Body() crearCarritoDto: CrearCarritoDto) {
+  @Post('agregar')
+  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto) {
     return this.carritoService.create(crearCarritoDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.carritoService.findAll();
   }
 
   @Get(':usuarioId')
-  findByUsuarioId(@Param('usuarioId') usuarioId: string) {
-    const parsedUsuarioId = parseInt(usuarioId, 10);
-    return this.carritoService.findByUsuarioId(parsedUsuarioId);
+  async obtenerItemsCarrito(@Param('usuarioId') usuarioId: string) {
+    const id = parseInt(usuarioId, 10);
+    return this.carritoService.findByUsuarioId(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    const parsedId = parseInt(id, 10);
-    return this.carritoService.remove(parsedId);
+  @Delete('eliminar/:id')
+  async eliminarItem(@Param('id') id: string) {
+    return this.carritoService.remove(parseInt(id, 10));
   }
 }
