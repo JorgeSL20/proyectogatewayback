@@ -36,6 +36,7 @@ export class ProductoService {
   }
 
   async create(createProductoDto: CreateProductoDto): Promise<Producto> {
+    console.log('CreateProductoDto en servicio:', createProductoDto); // Log para verificar datos
     const newProducto = this.productoRepository.create(createProductoDto);
     return this.productoRepository.save(newProducto);
   }
@@ -56,3 +57,4 @@ export class ProductoService {
     };
   }
 }
+

@@ -13,6 +13,7 @@ export class ProductoController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
+    console.log('CreateProductoDto:', createProductoDto); // Log para verificar datos
     const result = await this.productoService.uploadImage(file);
     createProductoDto.url = result.secure_url;
     createProductoDto.publicId = result.public_id;

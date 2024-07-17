@@ -1,4 +1,3 @@
-// src/producto/dto/create-producto.dto.ts
 export class CreateProductoDto {
     id: number;
     url: string;
@@ -9,5 +8,4 @@ export class CreateProductoDto {
     descripcion: string;
     precio: number;
     existencias: number;
-  }
-  
+}
