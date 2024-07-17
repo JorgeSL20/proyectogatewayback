@@ -8,6 +8,7 @@ import { Producto } from './entities/producto.entity';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import { Express } from 'express';
 
+
 cloudinary.config({
   cloud_name: 'dkwb9vcbb',
   api_key: '724994365615579',
