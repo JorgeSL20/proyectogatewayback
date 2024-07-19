@@ -11,6 +11,7 @@ import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
 import { Logs } from './entities/logs.entity';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,6 +23,7 @@ export class AuthService {
     private preguntasRepository: Repository<Preguntas>,
     @InjectRepository(Logs) // Inyecta el repositorio de Logs
     private logsRepository: Repository<Logs>,
+    
     
   ) {}
 
@@ -282,5 +284,12 @@ async crearLogs(data:{accion:string,ip:string,url:string,status:number,fecha:str
     ...data
   })
   this.logsRepository.save(newLog)
+}
+async validateToken(token: string): Promise<Auth | null> {
+  const userId = parseInt(token, 10);
+  if (isNaN(userId)) {
+    return null;
+  }
+  return this.authRepository.findOne({ where: { id: userId } });
 }
 }

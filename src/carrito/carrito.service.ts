@@ -18,9 +18,9 @@ export class CarritoService {
   ) {}
 
   async create(crearCarritoDto: CrearCarritoDto) {
-    const usuario = await this.authRepository.findOne({ where: { id: crearCarritoDto.usuarioId } });
+    const usuario = await this.authRepository.findOne({ where: { id: crearCarritoDto.userId } });
     if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${crearCarritoDto.usuarioId} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${crearCarritoDto.userId} no encontrado`);
     }
 
     const producto = await this.productoRepository.findOne({ where: { id: crearCarritoDto.productoId } });

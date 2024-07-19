@@ -1,41 +1,22 @@
-import { Controller, Get, Post, Body, Param, Delete, Request, HttpException,HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('carrito')
 export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
   @Post('agregar')
-  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Request() req) {
-    // Obtener el ID del usuario desde el token en el encabezado de la solicitud
-    const usuarioId = req.headers['authorization'];
-
-    if (!usuarioId) {
-      throw new HttpException('Token no proporcionado', HttpStatus.UNAUTHORIZED);
-    }
-
-    // Llamar al servicio para agregar el ítem
-    return this.carritoService.create({
-      ...crearCarritoDto,
-      usuarioId: parseInt(usuarioId, 10) // Asegúrate de que el token sea un número
-    });
+  @UseGuards(AuthGuard)
+  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() request) {
+    const userId = request.user.id;
+    return this.carritoService.create({ ...crearCarritoDto, userId });
   }
 
-  @Get()
-  async findAll() {
-    return this.carritoService.findAll();
-  }
-
-  @Get('items')
-  async obtenerItemsCarrito(@Request() req) {
-    const usuarioId = req.headers['authorization'];
-
-    if (!usuarioId) {
-      throw new HttpException('Token no proporcionado', HttpStatus.UNAUTHORIZED);
-    }
-
-    return this.carritoService.findByUsuarioId(parseInt(usuarioId, 10));
+  @Get('items/:userId')
+  async obtenerItemsCarrito(@Param('userId') userId: string) {
+    return this.carritoService.findByUsuarioId(parseInt(userId, 10));
   }
 
   @Delete('eliminar/:id')
