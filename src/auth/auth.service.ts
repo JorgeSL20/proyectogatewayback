@@ -21,7 +21,8 @@ export class AuthService {
     @InjectRepository(Preguntas)
     private preguntasRepository: Repository<Preguntas>,
     @InjectRepository(Logs) // Inyecta el repositorio de Logs
-    private logsRepository: Repository<Logs>
+    private logsRepository: Repository<Logs>,
+    
   ) {}
 
   create(createAuthDto: CreateAuthDto) {
@@ -31,6 +32,13 @@ export class AuthService {
       ...resultado
     })
     return this.authRepository.save(newuser)
+  }
+
+  async login(user: Auth): Promise<{ token: number }> {
+    // Aquí solo devolvemos el ID del usuario como el "token"
+    return {
+      token: user.id,
+    };
   }
   ///
   async updateById(id:number,updateAuthDto: CreateAuthDto){
