@@ -16,7 +16,7 @@ export class CarritoController {
     return this.carritoService.findAll();
   }
 
-  @Get(':usuarioId')
+  @Get('items/:usuarioId')  // Ruta actualizada
   async obtenerItemsCarrito(@Param('usuarioId') usuarioId: string) {
     const id = parseInt(usuarioId, 10);
     return this.carritoService.findByUsuarioId(id);
@@ -27,3 +27,4 @@ export class CarritoController {
     return this.carritoService.remove(parseInt(id, 10));
   }
 }
+
