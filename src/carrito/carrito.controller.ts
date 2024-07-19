@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Request, HttpException,HttpStatus } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 
@@ -7,17 +7,19 @@ export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
   @Post('agregar')
-  async agregarItem(
-    @Body() crearCarritoDto: CrearCarritoDto,
-    @Headers('authorization') token: string
-  ) {
-    // Obtener el ID del usuario del token
-    const userId = parseInt(token.replace('Bearer ', ''), 10);
-    
-    // Asignar el usuarioId al DTO
-    crearCarritoDto.usuarioId = userId;
+  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Request() req) {
+    // Obtener el ID del usuario desde el token en el encabezado de la solicitud
+    const usuarioId = req.headers['authorization'];
 
-    return this.carritoService.create(crearCarritoDto);
+    if (!usuarioId) {
+      throw new HttpException('Token no proporcionado', HttpStatus.UNAUTHORIZED);
+    }
+
+    // Llamar al servicio para agregar el ítem
+    return this.carritoService.create({
+      ...crearCarritoDto,
+      usuarioId: parseInt(usuarioId, 10) // Asegúrate de que el token sea un número
+    });
   }
 
   @Get()
@@ -26,23 +28,18 @@ export class CarritoController {
   }
 
   @Get('items')
-  async obtenerItemsCarrito(
-    @Headers('authorization') token: string
-  ) {
-    const userId = parseInt(token.replace('Bearer ', ''), 10);
-    return this.carritoService.findByUsuarioId(userId);
+  async obtenerItemsCarrito(@Request() req) {
+    const usuarioId = req.headers['authorization'];
+
+    if (!usuarioId) {
+      throw new HttpException('Token no proporcionado', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.carritoService.findByUsuarioId(parseInt(usuarioId, 10));
   }
 
   @Delete('eliminar/:id')
-  async eliminarItem(
-    @Param('id') id: string,
-    @Headers('authorization') token: string
-  ) {
-    // Validar el ID del usuario del token si es necesario
-    const userId = parseInt(token.replace('Bearer ', ''), 10);
-
-    // Puedes usar userId aquí si necesitas hacer alguna verificación adicional
-
+  async eliminarItem(@Param('id') id: string) {
     return this.carritoService.remove(parseInt(id, 10));
   }
 }
