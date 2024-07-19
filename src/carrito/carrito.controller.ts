@@ -1,22 +1,28 @@
-import { Controller, Post, Body, Get, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('carrito')
+@UseGuards(AuthGuard)
 export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
   @Post('agregar')
-  @UseGuards(AuthGuard)
-  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() request) {
-    const userId = request.user.id;
-    return this.carritoService.create({ ...crearCarritoDto, userId });
+  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
+    const userId = req.user.id;
+    return this.carritoService.create({ ...crearCarritoDto, usuarioId: userId });
   }
 
-  @Get('items/:userId')
-  async obtenerItemsCarrito(@Param('userId') userId: string) {
-    return this.carritoService.findByUsuarioId(parseInt(userId, 10));
+  @Get()
+  async findAll() {
+    return this.carritoService.findAll();
+  }
+
+  @Get('items/:usuarioId')
+  async obtenerItemsCarrito(@Param('usuarioId') usuarioId: string) {
+    const id = parseInt(usuarioId, 10);
+    return this.carritoService.findByUsuarioId(id);
   }
 
   @Delete('eliminar/:id')
