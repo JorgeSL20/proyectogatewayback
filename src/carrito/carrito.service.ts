@@ -17,10 +17,10 @@ export class CarritoService {
     private productoRepository: Repository<Producto>,
   ) {}
 
-  async create(crearCarritoDto: CrearCarritoDto) {
-    const usuario = await this.authRepository.findOne({ where: { id: crearCarritoDto.usuarioId } });
+  async create(crearCarritoDto: CrearCarritoDto, userId: number) {
+    const usuario = await this.authRepository.findOne({ where: { id: userId } });
     if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${crearCarritoDto.usuarioId} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
     }
 
     const producto = await this.productoRepository.findOne({ where: { id: crearCarritoDto.productoId } });

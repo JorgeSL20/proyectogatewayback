@@ -11,7 +11,7 @@ export class CarritoController {
   @Post('agregar')
   async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
     const userId = req.user.id;
-    return this.carritoService.create({ ...crearCarritoDto, usuarioId: userId });
+    return this.carritoService.create(crearCarritoDto, userId);
   }
 
   @Get()
