@@ -1,3 +1,4 @@
+// src/carrito/carrito.service.ts
 import { Injectable, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -50,9 +51,20 @@ export class CarritoService {
   }
 
   async findByUsuarioId(usuarioId: number) {
-    return this.carritoRepository.find({
+    const items = await this.carritoRepository.find({
       where: { usuario: { id: usuarioId } },
       relations: ['usuario', 'producto'],
     });
+
+    // Map items to include detailed product information
+    return items.map(item => ({
+      id: item.id,
+      usuarioId: item.usuario.id,
+      productoId: item.producto.id,
+      productoNombre: item.producto.producto,
+      productoImagen: item.producto.url,
+      productoPrecio: item.producto.precio,
+      cantidad: item.cantidad
+    }));
   }
 }

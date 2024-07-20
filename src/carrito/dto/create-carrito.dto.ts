@@ -1,11 +1,28 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+// src/carrito/dto/create-carrito-item.dto.ts
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CrearCarritoDto {
-  @IsInt()
+  @IsNumber()
+  @IsNotEmpty()
+  usuarioId: number;
+
+  @IsNumber()
   @IsNotEmpty()
   productoId: number;
 
-  @IsInt()
+  @IsString()
+  @IsNotEmpty()
+  productoNombre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  productoImagen: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  productoPrecio: number;
+
+  @IsNumber()
   @IsNotEmpty()
   cantidad: number;
 }

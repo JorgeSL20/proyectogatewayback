@@ -1,3 +1,4 @@
+// src/carrito/carrito.controller.ts
 import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
