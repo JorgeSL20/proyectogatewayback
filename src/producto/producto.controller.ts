@@ -24,6 +24,12 @@ export class ProductoController {
     return this.productoService.findAll();
   }
 
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const parsedId = parseInt(id, 10);
+    return this.productoService.findOne(parsedId);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const parsedId = parseInt(id, 10);

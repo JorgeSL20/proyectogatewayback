@@ -37,6 +37,10 @@ export class ProductoService {
     return this.productoRepository.find();
   }
 
+  async findOne(id: number): Promise<Producto> {
+    return this.productoRepository.findOne({ where: { id } });
+  }
+
   async remove(id: number): Promise<void> {
     await this.productoRepository.delete(id);
   }
