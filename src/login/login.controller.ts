@@ -38,7 +38,7 @@ export class LoginController {
             fecha: createLoginDto.fecha,
             ip: createLoginDto.ip,
             status: 409,
-            url: '/login'
+            url_solicitada: '/login'
           }, datos.email);
 
           return {
@@ -58,7 +58,7 @@ export class LoginController {
               fecha: createLoginDto.fecha,
               ip: createLoginDto.ip,
               status: 200,
-              url: '/login'
+              url_solicitada: '/login'
             }, datos.email);
 
             return {
