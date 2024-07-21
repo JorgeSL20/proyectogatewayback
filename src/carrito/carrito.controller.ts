@@ -9,10 +9,10 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
-  @Post('agregar')
-  async agregarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
+  @Post('agregar-o-actualizar')
+  async agregarOActualizarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
     const userId = req.user.id;
-    return this.carritoService.create(crearCarritoDto, userId);
+    return this.carritoService.createOrUpdate(crearCarritoDto, userId);
   }
 
   @Get()

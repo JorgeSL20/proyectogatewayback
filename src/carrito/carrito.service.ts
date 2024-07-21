@@ -1,5 +1,5 @@
 // src/carrito/carrito.service.ts
-import { Injectable, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Injectable, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Carrito } from './entities/carrito.entity';
@@ -18,7 +18,7 @@ export class CarritoService {
     private productoRepository: Repository<Producto>,
   ) {}
 
-  async create(crearCarritoDto: CrearCarritoDto, userId: number) {
+  async createOrUpdate(crearCarritoDto: CrearCarritoDto, userId: number) {
     const usuario = await this.authRepository.findOne({ where: { id: userId } });
     if (!usuario) {
       throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
@@ -31,21 +31,41 @@ export class CarritoService {
 
     // Verificar existencia suficiente
     if (producto.existencias < crearCarritoDto.cantidad) {
-      throw new NotFoundException(`No hay suficientes existencias del producto con ID ${crearCarritoDto.productoId}`);
+      throw new BadRequestException(`No hay suficientes existencias del producto con ID ${crearCarritoDto.productoId}`);
     }
 
-    // Crear el ítem del carrito
-    const newCarrito = this.carritoRepository.create({
-      usuario: usuario,
-      producto: producto,
-      cantidad: crearCarritoDto.cantidad,
+    // Buscar si ya existe el ítem en el carrito del usuario
+    let carritoItem = await this.carritoRepository.findOne({
+      where: { usuario: { id: userId }, producto: { id: crearCarritoDto.productoId } },
+      relations: ['usuario', 'producto'],
     });
 
-    // Actualizar existencias del producto
-    producto.existencias -= crearCarritoDto.cantidad;
-    await this.productoRepository.save(producto);
+    if (carritoItem) {
+      // Si ya existe, actualizar la cantidad
+      carritoItem.cantidad += crearCarritoDto.cantidad;
 
-    return this.carritoRepository.save(newCarrito);
+      // Actualizar existencias del producto
+      producto.existencias -= crearCarritoDto.cantidad;
+      if (producto.existencias < 0) {
+        throw new BadRequestException(`No hay suficientes existencias del producto con ID ${crearCarritoDto.productoId}`);
+      }
+      await this.productoRepository.save(producto);
+
+      return this.carritoRepository.save(carritoItem);
+    } else {
+      // Si no existe, crear un nuevo ítem
+      const newCarrito = this.carritoRepository.create({
+        usuario: usuario,
+        producto: producto,
+        cantidad: crearCarritoDto.cantidad,
+      });
+
+      // Actualizar existencias del producto
+      producto.existencias -= crearCarritoDto.cantidad;
+      await this.productoRepository.save(producto);
+
+      return this.carritoRepository.save(newCarrito);
+    }
   }
 
   async remove(id: number) {
