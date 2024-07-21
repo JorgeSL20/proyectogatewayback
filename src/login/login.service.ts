@@ -49,7 +49,7 @@ export class LoginService {
       }
 
       if (intento >= 5) {
-        await this.resetearIntentos(datos.id_usuario);
+        await this.resetearIntentos(datos.id);
         await this.crearLogs({
           accion: 'Sesión bloqueada',
           fecha: new Date().toISOString(),
@@ -61,7 +61,7 @@ export class LoginService {
         throw new HttpException('Número máximo de intentos alcanzado. Intenta de nuevo en 5 minutos.', HttpStatus.CONFLICT);
       } else {
         intento++;
-        await this.asignarIntentos(datos.id_usuario, intento, ahora);
+        await this.asignarIntentos(datos.id, intento, ahora);
       }
     }
   }
