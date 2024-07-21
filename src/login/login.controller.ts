@@ -12,7 +12,9 @@ export class LoginController {
   async validLogin(@Body() createLoginDto: CreateLoginDto) {
     try {
       const datos = await this.userService.getUser(createLoginDto.email);
-      if (!datos) throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      if (!datos) {
+        throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      }
 
       const ahora = new Date();
       const fechaUltimoIntento = datos.fechaUltimoIntento ? new Date(datos.fechaUltimoIntento) : null;
@@ -69,7 +71,7 @@ export class LoginController {
           } else {
             return {
               message: 'Login incorrecto',
-              status: 400
+              status: HttpStatus.UNAUTHORIZED
             };
           }
         }

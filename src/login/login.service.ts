@@ -30,7 +30,7 @@ export class LoginService {
     await this.authRepository.update(id, { intentos: 0, fechaUltimoIntento: null });
   }
 
-  async crearLogs(data: {accion: string, ip: string, url_solicitada: string, status: number, fecha: string}, email: string) {
+  async crearLogs(data: { accion: string, ip: string, url_solicitada: string, status: number, fecha: string }, email: string) {
     const userFound = await this.authRepository.findOne({ where: { email: email } });
     if (userFound) {
       const newLog = this.logsRepository.create({ usuario: userFound, ...data });
