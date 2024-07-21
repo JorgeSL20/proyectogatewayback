@@ -1,3 +1,4 @@
+// src/producto/entities/producto.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Carrito } from '../../carrito/entities/carrito.entity';
 
@@ -25,7 +26,7 @@ export class Producto {
     precio: number;
 
     @Column()
-    existencias: number;
+    existencias: number;  // Renombrado a 'existencias'
 
     @OneToMany(() => Carrito, carrito => carrito.producto)
     carritos: Carrito[];
