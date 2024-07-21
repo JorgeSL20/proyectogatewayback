@@ -16,8 +16,11 @@ export class LoginController {
         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
       }
 
+      this.loginService.checkAndUpdateAttempts(datos);
+
       const isValidLogin = await this.loginService.validLogin(createLoginDto);
       if (isValidLogin) {
+        await this.loginService.resetearIntentos(datos.id);
         await this.loginService.crearLogs({
           accion: 'Inicio de sesión',
           fecha: createLoginDto.fecha,
@@ -34,15 +37,11 @@ export class LoginController {
       } else {
         return {
           message: 'Login incorrecto',
-          status: 400
+          status: HttpStatus.UNAUTHORIZED
         };
       }
     } catch (error) {
-      return {
-        message: 'Correo Invalido',
-        status: 302
-      }
+      throw new HttpException("El correo no existe", HttpStatus.FOUND);
     }
   }
-
 }
