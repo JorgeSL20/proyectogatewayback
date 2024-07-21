@@ -9,7 +9,6 @@ import { Logs } from 'src/auth/entities/logs.entity';
 
 @Injectable()
 export class LoginService {
-
   constructor(
     @InjectRepository(Auth) private authRepository: Repository<Auth>, 
     private authService: AuthService,
@@ -17,13 +16,13 @@ export class LoginService {
   ) { }
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
-
-    const data = await this.authService.getUser(createLoginDto.email)
-    console.log(createLoginDto)
-    if (await bcryptjs.compare(createLoginDto.password, data.password))
-      return true;
-    else
+    const data = await this.authService.getUser(createLoginDto.email);
+    if (!data) {
       return false;
+    }
+
+    const isPasswordValid = await bcryptjs.compare(createLoginDto.password, data.password);
+    return isPasswordValid;
   }
 
   async asignarIntentos(id: number, intento: number, fechaUltimoIntento: Date) {

@@ -5,7 +5,6 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Controller('login')
 export class LoginController {
-
   constructor(private readonly loginService: LoginService, private userService: AuthService) {}
 
   @Post()
@@ -77,11 +76,11 @@ export class LoginController {
         }
       }
     } catch (error) {
+      console.error('Error en validLogin:', error);
       return {
-        message: 'Correo Invalido',
+        message: 'Correo inválido o error del servidor',
         status: 302
-      }
+      };
     }
   }
-
 }
