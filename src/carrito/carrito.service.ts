@@ -67,4 +67,18 @@ export class CarritoService {
       cantidad: item.cantidad
     }));
   }
+
+  async actualizarCantidad(id: number, cantidad: number) {
+    const carritoItem = await this.carritoRepository.findOne({
+      where: { id },
+      relations: ['producto']
+    });
+
+    if (!carritoItem) {
+      throw new NotFoundException(`Item del carrito con ID ${id} no encontrado`);
+    }
+
+    carritoItem.cantidad = cantidad;
+    return this.carritoRepository.save(carritoItem);
+  }
 }

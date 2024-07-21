@@ -1,5 +1,5 @@
 // src/carrito/carrito.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -29,5 +29,13 @@ export class CarritoController {
   @Delete('eliminar/:id')
   async eliminarItem(@Param('id') id: string) {
     return this.carritoService.remove(parseInt(id, 10));
+  }
+
+  @Put('actualizar-cantidad/:id')
+  async actualizarCantidad(
+    @Param('id') id: string,
+    @Body('cantidad') cantidad: number
+  ) {
+    return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
   }
 }
