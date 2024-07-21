@@ -22,12 +22,12 @@ export class LoginService {
     return await bcryptjs.compare(createLoginDto.password, data.password);
   }
 
-  async asignarIntentos(id: number, intento: number) {
-    await this.authRepository.update(id, { intentos: intento });
+  async asignarIntentos(id: number, intento: number, fechaUltimoIntento: Date) {
+    await this.authRepository.update(id, { intentos: intento, fechaUltimoIntento: fechaUltimoIntento });
   }
 
   async resetearIntentos(id: number) {
-    await this.authRepository.update(id, { intentos: 0 });
+    await this.authRepository.update(id, { intentos: 0, fechaUltimoIntento: null });
   }
 
   async crearLogs(data: {accion: string, ip: string, url: string, status: number, fecha: string}, email: string) {

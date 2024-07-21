@@ -14,18 +14,23 @@ export class LoginController {
       const datos = await this.userService.getUser(createLoginDto.email);
       if (!datos) throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
 
-      let intento = datos.intentos;
+      const ahora = new Date();
+      const fechaUltimoIntento = datos.fechaUltimoIntento ? new Date(datos.fechaUltimoIntento) : null;
+      const tiempoTranscurrido = fechaUltimoIntento ? (ahora.getTime() - fechaUltimoIntento.getTime()) / 60000 : null; // En minutos
 
-      if (intento >= 5) {  
+      if (datos.intentos >= 5 && (tiempoTranscurrido < 5)) {
         return {
-          message: 'Número máximo de intentos alcanzado',
+          message: 'Número máximo de intentos alcanzado. Intenta de nuevo en 5 minutos.',
           status: HttpStatus.CONFLICT,
-          nIntentos: intento
+          nIntentos: datos.intentos
         };
       } else {
-        intento++;
-        await this.loginService.asignarIntentos(datos.id, intento);
-        
+        let intento = datos.intentos;
+
+        if (tiempoTranscurrido >= 5) { // Si han pasado 5 minutos, reinicia los intentos
+          intento = 0;
+        }
+
         if (intento >= 5) {
           await this.loginService.resetearIntentos(datos.id);
           await this.loginService.crearLogs({
@@ -37,11 +42,14 @@ export class LoginController {
           }, datos.email);
 
           return {
-            message: 'Número máximo de intentos alcanzado',
+            message: 'Número máximo de intentos alcanzado. Intenta de nuevo en 5 minutos.',
             status: HttpStatus.CONFLICT,
             nIntentos: intento
           };
         } else {
+          intento++;
+          await this.loginService.asignarIntentos(datos.id, intento, ahora);
+
           const isValidLogin = await this.loginService.validLogin(createLoginDto);
           if (isValidLogin) {
             await this.loginService.resetearIntentos(datos.id);
