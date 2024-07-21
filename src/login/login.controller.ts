@@ -38,7 +38,7 @@ export class LoginController {
             fecha: createLoginDto.fecha,
             ip: createLoginDto.ip,
             status: 409,
-            url: '/login'
+            url_solicitada: '/login'
           }, datos.email);
 
           return {
@@ -58,7 +58,7 @@ export class LoginController {
               fecha: createLoginDto.fecha,
               ip: createLoginDto.ip,
               status: 200,
-              url: '/login'
+              url_solicitada: '/login'
             }, datos.email);
 
             return {
@@ -75,7 +75,11 @@ export class LoginController {
         }
       }
     } catch (error) {
-      throw new HttpException('Error en el proceso de login', HttpStatus.INTERNAL_SERVER_ERROR);
+      return {
+        message: 'Correo Invalido',
+        status: 302
+      }
     }
   }
+
 }
