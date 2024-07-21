@@ -17,9 +17,13 @@ export class LoginService {
   ) { }
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
-    const data = await this.authService.getUser(createLoginDto.email);
-    if (!data) return false; // Verifica si el usuario existe
-    return await bcryptjs.compare(createLoginDto.password, data.password);
+
+    const data = await this.authService.getUser(createLoginDto.email)
+    console.log(createLoginDto)
+    if (await bcryptjs.compare(createLoginDto.password, data.password))
+      return true;
+    else
+      return false;
   }
 
   async asignarIntentos(id: number, intento: number, fechaUltimoIntento: Date) {
