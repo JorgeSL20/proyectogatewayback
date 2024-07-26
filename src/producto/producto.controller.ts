@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Delete, Put, Body, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
+import { UpdateProductoDto } from './dto/update-producto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('producto')
@@ -28,6 +29,12 @@ export class ProductoController {
   async findOne(@Param('id') id: string) {
     const parsedId = parseInt(id, 10);
     return this.productoService.findOne(parsedId);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateProductoDto: UpdateProductoDto) {
+    const parsedId = parseInt(id, 10);
+    return this.productoService.updateById(parsedId, updateProductoDto);
   }
 
   @Delete(':id')

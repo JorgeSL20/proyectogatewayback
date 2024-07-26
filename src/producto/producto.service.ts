@@ -41,15 +41,15 @@ export class ProductoService {
     return this.productoRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.productoRepository.delete(id);
-  }
-
   async updateById(id: number, updateProductoDto: UpdateProductoDto) {
     await this.productoRepository.update(id, { ...updateProductoDto });
     return {
       message: 'Producto actualizado correctamente',
       status: HttpStatus.OK,
     };
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.productoRepository.delete(id);
   }
 }
