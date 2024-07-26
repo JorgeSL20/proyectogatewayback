@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus,BadRequestException,InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producto } from './entities/producto.entity';
@@ -42,12 +42,21 @@ export class ProductoService {
   }
 
   async updateById(id: number, updateProductoDto: UpdateProductoDto) {
-    await this.productoRepository.update(id, { ...updateProductoDto });
-    return {
-      message: 'Producto actualizado correctamente',
-      status: HttpStatus.OK,
-    };
+    try {
+      const result = await this.productoRepository.update(id, { ...updateProductoDto });
+      if (result.affected === 0) {
+        throw new BadRequestException('Producto no encontrado');
+      }
+      return {
+        message: 'Producto actualizado correctamente',
+        status: HttpStatus.OK,
+      };
+    } catch (error) {
+      console.error('Error al actualizar producto:', error);
+      throw new InternalServerErrorException('Error al actualizar producto');
+    }
   }
+  
 
   async remove(id: number): Promise<void> {
     await this.productoRepository.delete(id);
