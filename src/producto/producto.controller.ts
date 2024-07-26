@@ -32,8 +32,20 @@ export class ProductoController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateProductoDto: UpdateProductoDto) {
+  @UseInterceptors(FileInterceptor('file'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductoDto: UpdateProductoDto,
+    @UploadedFile() file: Express.Multer.File
+  ) {
     const parsedId = parseInt(id, 10);
+
+    if (file) {
+      // Maneja el archivo subido
+      const result = await this.productoService.uploadImage(file);
+      updateProductoDto.url = result.secure_url;
+    }
+
     return this.productoService.updateById(parsedId, updateProductoDto);
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus,BadRequestException,InternalServerErrorException } from '@nestjs/common';
+import { Injectable, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producto } from './entities/producto.entity';
@@ -41,8 +41,14 @@ export class ProductoService {
     return this.productoRepository.findOne({ where: { id } });
   }
 
-  async updateById(id: number, updateProductoDto: UpdateProductoDto) {
+  async updateById(id: number, updateProductoDto: UpdateProductoDto, file?: Express.Multer.File) {
     try {
+      if (file) {
+        // Maneja el archivo subido
+        const result = await this.uploadImage(file);
+        updateProductoDto.url = result.secure_url;
+      }
+
       const result = await this.productoRepository.update(id, { ...updateProductoDto });
       if (result.affected === 0) {
         throw new BadRequestException('Producto no encontrado');
@@ -56,7 +62,6 @@ export class ProductoService {
       throw new InternalServerErrorException('Error al actualizar producto');
     }
   }
-  
 
   async remove(id: number): Promise<void> {
     await this.productoRepository.delete(id);
