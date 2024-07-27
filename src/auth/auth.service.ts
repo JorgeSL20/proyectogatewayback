@@ -109,10 +109,14 @@ export class AuthService {
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
     const data = await this.getUser(createLoginDto.email);
-    if (await bcryptjs.compare(createLoginDto.password, (await data).password)) return true;
-    else return false;
+    if (!data) {
+      return false; // El correo no es válido
+    }
+    const isPasswordValid = await bcryptjs.compare(createLoginDto.password, data.password);
+    return isPasswordValid;
   }
-
+  
+  
   findAll() {
     return this.authRepository.find();
   }

@@ -19,12 +19,17 @@ export class LoginController {
       console.log("entra");
       const datos = await this.userService.getUser(createLoginDto.email);
       console.log(datos);
-      if (datos === null) throw new Error("Usuario no encontrado");
+      if (datos === null) {
+        return {
+          message: 'Correo inválido',
+          status: HttpStatus.FOUND,
+        };
+      }
 
       this.intento = datos.intentos;
-      if (this.intento === 5) {
+      if (this.intento >= 5) {
         return {
-          message: 'Numero de maximo de intentos alcanzado',
+          message: 'Número máximo de intentos alcanzado',
           status: HttpStatus.CONFLICT,
           nIntentos: this.intento,
         };
@@ -36,7 +41,7 @@ export class LoginController {
           await this.loginService.resetearIntentos(datos.id);
           await this.loginService.crearLogs(
             {
-              accion: 'Sesion bloqueada',
+              accion: 'Sesión bloqueada',
               fecha: createLoginDto.fecha,
               ip: createLoginDto.ip,
               status: 409,
@@ -45,7 +50,7 @@ export class LoginController {
             datos.email
           );
           return {
-            message: 'Numero de maximo de intentos alcanzado',
+            message: 'Número máximo de intentos alcanzado',
             status: HttpStatus.CONFLICT,
             nIntentos: this.intento,
           };
@@ -55,7 +60,7 @@ export class LoginController {
             await this.loginService.resetearIntentos(datos.id);
             await this.loginService.crearLogs(
               {
-                accion: 'Inicio de sesion',
+                accion: 'Inicio de sesión',
                 fecha: createLoginDto.fecha,
                 ip: createLoginDto.ip,
                 status: 200,
@@ -65,13 +70,13 @@ export class LoginController {
             );
             return {
               message: 'Login correcto',
-              status: 200,
+              status: HttpStatus.OK,
               token: datos.id,
             };
           } else {
             return {
-              message: 'Login incorrecto',
-              status: 400,
+              message: 'Contraseña incorrecta',
+              status: HttpStatus.BAD_REQUEST,
             };
           }
         }
@@ -79,8 +84,8 @@ export class LoginController {
     } catch (error) {
       console.error(error);
       return {
-        message: 'Correo inválido',
-        status: 302,
+        message: 'Error en el servidor',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
   }
