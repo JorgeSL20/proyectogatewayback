@@ -1,6 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm"; 
 import { Logs } from "./logs.entity";
 import { Carrito } from "src/carrito/entities/carrito.entity";
+
 @Entity({ name: 'usuarios' })
 export class Auth {
     @PrimaryGeneratedColumn()
@@ -30,12 +31,16 @@ export class Auth {
     @Column({ nullable: true })
     intentos?: number | null;
 
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    lastAttempt: Date;
+
     @OneToMany(() => Logs, logs => logs.usuario)
-    logs:Logs[];
+    logs: Logs[];
     
     @OneToMany(() => Carrito, carrito => carrito.usuario)
-  carritos: Carrito[];
+    carritos: Carrito[];
 }
+
 
 @Entity({ name: 'informacion' })
 export class Informacion {

@@ -16,7 +16,6 @@ export class LoginService {
     @InjectRepository(Logs) private logsRepository: Repository<Logs>) { }
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
-
     const data = await this.authService.getUser(createLoginDto.email)
     console.log(createLoginDto)
     if (await bcryptjs.compare(createLoginDto.password, data.password))
@@ -25,32 +24,37 @@ export class LoginService {
       return false;
   }
 
-  asignarIntentos(id: number, intento: number) {
-    this.authRepository.query(
-      "UPDATE usuarios SET intentos = " + intento + " WHERE id = " + id + ""
-    )
+  async asignarIntentos(id: number, intento: number) {
+    const user = await this.authRepository.findOne({ where: { id } });
+    if (user) {
+      user.intentos = intento;
+      user.lastAttempt = new Date();
+      await this.authRepository.save(user);
+    }
   }
 
-  resetearIntentos(id: number) {
+  async resetearIntentos(id: number) {
     console.log("conteo iniciado")
-    setTimeout(() => {
-      this.authRepository.query(
-        "UPDATE usuarios SET intentos = 0 WHERE id = " + id + ""
-      )
-      console.log("Intentos reseteados")
+    setTimeout(async () => {
+      const user = await this.authRepository.findOne({ where: { id } });
+      if (user) {
+        user.intentos = 0;
+        await this.authRepository.save(user);
+        console.log("Intentos reseteados")
+      }
     }, 300000)
   }
 
- async crearLogs(data:{accion:string,ip:string,url_solicitada:string,status:number,fecha:string},email:string){
-    const userFound =  await this.authRepository.findOne({
+  async crearLogs(data: { accion: string, ip: string, url_solicitada: string, status: number, fecha: string }, email: string) {
+    const userFound = await this.authRepository.findOne({
       where: {
         email: email
       }
-    })
+    });
     const newLog = this.logsRepository.create({
-      usuario:userFound,
+      usuario: userFound,
       ...data
-    })
-    this.logsRepository.save(newLog)
+    });
+    await this.logsRepository.save(newLog);
   }
 }
