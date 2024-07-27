@@ -1,71 +1,86 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { CreateLoginDto } from './dto/create-login.dto';
 import { AuthService } from 'src/auth/auth.service';
 
 @Controller('login')
 export class LoginController {
-  constructor(private readonly loginService: LoginService, private userService: AuthService) {}
+  constructor(
+    private readonly loginService: LoginService,
+    private userService: AuthService
+  ) {}
+
+  intento: number = 0;
 
   @Post()
   async validLogin(@Body() createLoginDto: CreateLoginDto) {
+    console.log(createLoginDto.password);
     try {
+      console.log("entra");
       const datos = await this.userService.getUser(createLoginDto.email);
-      if (datos === null) throw new Error("error");
+      console.log(datos);
+      if (datos === null) throw new Error("Usuario no encontrado");
 
-      await this.loginService.resetearIntentos(datos.id); // Intentar resetear antes de incrementar intentos
-
-      if (datos.intentos >= 5) {
+      this.intento = datos.intentos;
+      if (this.intento === 5) {
         return {
-          message: 'Número máximo de intentos alcanzado',
+          message: 'Numero de maximo de intentos alcanzado',
           status: HttpStatus.CONFLICT,
-          nIntentos: datos.intentos
+          nIntentos: this.intento,
         };
       } else {
-        datos.intentos++;
-        await this.loginService.asignarIntentos(datos.id, datos.intentos);
-
-        if (datos.intentos >= 5) {
-          await this.loginService.crearLogs({
-            accion: 'Sesión bloqueada',
-            fecha: createLoginDto.fecha,
-            ip: createLoginDto.ip,
-            status: 409,
-            url_solicitada: '/login'
-          }, datos.email);
-          return {
-            message: 'Número máximo de intentos alcanzado',
-            status: HttpStatus.CONFLICT,
-            nIntentos: datos.intentos
-          };
-        } else {
-          const loginSuccessful = await this.loginService.validLogin(createLoginDto);
-          if (loginSuccessful) {
-            await this.loginService.asignarIntentos(datos.id, 0); // Resetear intentos en login exitoso
-            await this.loginService.crearLogs({
-              accion: 'Inicio de sesión',
+        this.intento++;
+        await this.loginService.asignarIntentos(datos.id, this.intento);
+        if (this.intento >= 5) {
+          console.log("la de abajo");
+          await this.loginService.resetearIntentos(datos.id);
+          await this.loginService.crearLogs(
+            {
+              accion: 'Sesion bloqueada',
               fecha: createLoginDto.fecha,
               ip: createLoginDto.ip,
-              status: 200,
-              url_solicitada: '/login'
-            }, datos.email);
+              status: 409,
+              url_solicitada: '/login',
+            },
+            datos.email
+          );
+          return {
+            message: 'Numero de maximo de intentos alcanzado',
+            status: HttpStatus.CONFLICT,
+            nIntentos: this.intento,
+          };
+        } else {
+          const data = await this.loginService.validLogin(createLoginDto);
+          if (data === true) {
+            await this.loginService.resetearIntentos(datos.id);
+            await this.loginService.crearLogs(
+              {
+                accion: 'Inicio de sesion',
+                fecha: createLoginDto.fecha,
+                ip: createLoginDto.ip,
+                status: 200,
+                url_solicitada: '/login',
+              },
+              datos.email
+            );
             return {
               message: 'Login correcto',
               status: 200,
-              token: datos.id
+              token: datos.id,
             };
           } else {
             return {
               message: 'Login incorrecto',
-              status: 400
+              status: 400,
             };
           }
         }
       }
     } catch (error) {
+      console.error(error);
       return {
         message: 'Correo inválido',
-        status: 302
+        status: 302,
       };
     }
   }
