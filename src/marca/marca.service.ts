@@ -19,23 +19,20 @@ export class MarcaService {
   async remove(id: number) {
     return this.marcaRepository.delete(id);
   }
-  
 
- /*  async updateById(id: number, updateMarcaDto: UpdateMarcaDto) {
+  async updateById(id: number, updateMarcaDto: any) {  // Ajusta el tipo de datos según tu DTO
     await this.marcaRepository.update(id, { ...updateMarcaDto });
     return {
       message: 'Marca actualizada correctamente',
       status: HttpStatus.OK,
     };
-  } */
+  }
 
   async findAll() {
     return this.marcaRepository.find();
   }
 
-  // async findOne(id: number) {
-  //   return this.productoRepository.findOne(id);
-  // }
-
-  
+  async findOne(id: number) {
+    return this.marcaRepository.findOne({ where: { id } });
+  }
 }

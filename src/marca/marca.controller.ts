@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { MarcaService } from './marca.service';
 import { CreateMarcaDto } from './dto/create-marca.dto';
-
+import { UpdateMarcaDto } from './dto/update-marca.dto';  // Asegúrate de tener este DTO
 
 @Controller('marca')
 export class MarcaController {
@@ -17,24 +17,21 @@ export class MarcaController {
     return this.marcaService.findAll();
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    const parsedId = parseInt(id, 10); // Convertir el ID a número entero
-    return this.marcaService.remove(parsedId);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    const parsedId = parseInt(id, 10);
+    return this.marcaService.findOne(parsedId);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.productoService.findOne(id);
-  // }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateMarcaDto: UpdateMarcaDto) {
+    const parsedId = parseInt(id, 10);
+    return this.marcaService.updateById(parsedId, updateMarcaDto);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateProductoDto: UpdateProductoDto) {
-  //   return this.productoService.update(id, updateProductoDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.productoService.remove(id);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    const parsedId = parseInt(id, 10);
+    return this.marcaService.remove(parsedId);
+  }
 }
