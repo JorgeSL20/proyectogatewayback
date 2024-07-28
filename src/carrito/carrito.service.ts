@@ -148,4 +148,19 @@ export class CarritoService {
       status: HttpStatus.OK,
     };
   }
+
+  async enviarConfirmacion(userId: number) {
+    const usuario = await this.authRepository.findOne({ where: { id: userId } });
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    // Aquí puedes agregar la lógica para enviar la confirmación
+    // Por ejemplo, enviar un correo electrónico con los detalles de la compra
+
+    return {
+      message: 'Confirmación enviada correctamente',
+      status: HttpStatus.OK,
+    };
+  }
 }

@@ -43,4 +43,10 @@ export class CarritoController {
   async procesarPago(@Body() pagoData: any) {
     return this.carritoService.procesarPago(pagoData);
   }
+
+  @Post('enviar-confirmacion')
+  async enviarConfirmacion(@Req() req) {
+    const userId = req.user.id;
+    return this.carritoService.enviarConfirmacion(userId);
+  }
 }

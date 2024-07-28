@@ -1,27 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Auth } from 'src/auth/entities/auth.entity';
 
-@Entity({ name: 'pagos' })
+@Entity()
 export class Pago {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    amount: number;
+  @ManyToOne(() => Auth, auth => auth.pagos)
+  usuario: Auth;
 
-    @Column()
-    currency: string;
+  @Column('decimal')
+  total: number;
 
-    @Column()
-    status: string;
-
-    @Column()
-    transactionId: string;
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    createdAt: Date;
-
-    @ManyToOne(() => Auth, auth => auth.pagos)
-    @JoinColumn({ name: 'usuario_id' })
-    usuario: Auth;
+  @Column('json')
+  items: any[];
 }

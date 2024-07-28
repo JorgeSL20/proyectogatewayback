@@ -14,52 +14,92 @@ export class PagoService {
   private readonly clientSecret: string;
 
   constructor(
-    @InjectRepository(Pago)
-    private readonly pagoRepository: Repository<Pago>,
-    @InjectRepository(Auth)
-    private readonly authRepository: Repository<Auth>,
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @InjectRepository(Pago)
+    private pagoRepository: Repository<Pago>,
+    @InjectRepository(Auth)
+    private authRepository: Repository<Auth>,
   ) {
-    this.paypalApiUrl = 'https://api.sandbox.paypal.com'; // Cambiar a la URL de producción cuando esté listo
-    this.clientId = this.configService.get<string>('PAYPAL_CLIENT_ID');
-    this.clientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET');
+    const isLive = this.configService.get<boolean>('PAYPAL_LIVE_MODE');
+    this.paypalApiUrl = isLive ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
+    this.clientId = this.configService.get<string>(isLive ? 'PAYPAL_CLIENT_ID_LIVE' : 'PAYPAL_CLIENT_ID_SANDBOX');
+    this.clientSecret = this.configService.get<string>(isLive ? 'PAYPAL_CLIENT_SECRET_LIVE' : 'PAYPAL_CLIENT_SECRET_SANDBOX');
   }
 
   async procesarPago(pagoData: any) {
-    const token = await this.generateAccessToken();
-    // Implementar la lógica para procesar el pago con PayPal usando el token
-    const pago = new Pago();
-    pago.amount = pagoData.amount;
-    pago.currency = pagoData.currency;
-    pago.status = 'pending';
-    pago.transactionId = 'transaction_id'; // Debe ser generado adecuadamente
-    pago.usuario = await this.authRepository.findOne(pagoData.usuarioId);
+    const { total, items, userId } = pagoData;
 
+    const auth = await firstValueFrom(
+      this.httpService.post(
+        `${this.paypalApiUrl}/v1/oauth2/token`,
+        'grant_type=client_credentials',
+        {
+          auth: {
+            username: this.clientId,
+            password: this.clientSecret,
+          },
+        }
+      )
+    );
+
+    const accessToken = auth.data.access_token;
+
+    const createOrder = await firstValueFrom(
+      this.httpService.post(
+        `${this.paypalApiUrl}/v2/checkout/orders`,
+        {
+          intent: 'CAPTURE',
+          purchase_units: [
+            {
+              amount: {
+                currency_code: 'USD',
+                value: total,
+              },
+              items: items.map((item: any) => ({
+                name: item.nombre,
+                unit_amount: {
+                  currency_code: 'USD',
+                  value: item.precio,
+                },
+                quantity: item.cantidad,
+              })),
+            },
+          ],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+    );
+
+    // Guardar información del pago en la base de datos
+    const usuario = await this.authRepository.findOne({ where: { id: userId } });
+    const pago = this.pagoRepository.create({
+      usuario,
+      total,
+      items,
+    });
     await this.pagoRepository.save(pago);
 
-    return { success: true, message: 'Pago procesado exitosamente', pago };
-  }
-
-  private async generateAccessToken(): Promise<string> {
-    const response = await firstValueFrom(this.httpService.post(
-      `${this.paypalApiUrl}/v1/oauth2/token`,
-      'grant_type=client_credentials',
-      {
-        auth: {
-          username: this.clientId,
-          password: this.clientSecret
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    ));
-    return response.data.access_token;
+    return {
+      message: 'Pago procesado exitosamente',
+      orderId: createOrder.data.id,
+      status: createOrder.status,
+    };
   }
 
   async enviarConfirmacion(confirmacionData: any) {
-    // Implementar la lógica para enviar el correo de confirmación
-    return { success: true, message: 'Correo de confirmación enviado' };
+    const { userId, orderId } = confirmacionData;
+
+    // Aquí puedes agregar la lógica para enviar la confirmación
+    // Por ejemplo, enviar un correo electrónico con los detalles del pedido
+
+    return {
+      message: 'Confirmación enviada correctamente',
+      status: 200,
+    };
   }
 }

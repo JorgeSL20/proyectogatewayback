@@ -11,12 +11,17 @@ import { MarcaModule } from './marca/marca.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { CarruselModule } from './carrusel/carrusel.module';
 import { CarritoModule } from './carrito/carrito.module';
+import { ConfigModule } from '@nestjs/config';
+
 
 
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
     type: 'mysql',
     host: 'viaduct.proxy.rlwy.net',//roundhouse.proxy.rlwy.net
@@ -26,6 +31,7 @@ import { CarritoModule } from './carrito/carrito.module';
     database: 'railway',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
+    
   }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule],
   controllers: [AppController],
   providers: [AppService],
