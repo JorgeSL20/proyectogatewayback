@@ -1,6 +1,6 @@
 // src/carrusel/dto/create-carrusel.dto.ts
 export class CreateCarruselDto {
-    id: number;
+    id?: number;
     url: string;
   }
   
