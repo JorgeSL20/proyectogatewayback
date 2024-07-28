@@ -53,13 +53,13 @@ export class PagoService {
           purchase_units: [
             {
               amount: {
-                currency_code: 'USD',
+                currency_code: 'MXN',
                 value: total,
               },
               items: items.map((item: any) => ({
                 name: item.nombre,
                 unit_amount: {
-                  currency_code: 'USD',
+                  currency_code: 'MXN',
                   value: item.precio,
                 },
                 quantity: item.cantidad,
