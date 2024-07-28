@@ -14,11 +14,8 @@ export class LoginController {
 
   @Post()
   async validLogin(@Body() createLoginDto: CreateLoginDto) {
-    console.log(createLoginDto.password);
     try {
-      console.log("entra");
       const datos = await this.userService.getUser(createLoginDto.email);
-      console.log(datos);
       if (datos === null) {
         return {
           message: 'Correo inválido',
@@ -35,17 +32,16 @@ export class LoginController {
         };
       } else {
         this.intento++;
-        await this.loginService.asignarIntentos(datos.id, this.intento);
+        await this.userService.asignarIntentos(datos.id, this.intento);
         if (this.intento >= 5) {
-          console.log("la de abajo");
-          await this.loginService.resetearIntentos(datos.id);
-          await this.loginService.crearLogs(
+          await this.userService.resetearIntentos(datos.id);
+          await this.userService.crearLogs(
             {
               accion: 'Sesión bloqueada',
               fecha: createLoginDto.fecha,
               ip: createLoginDto.ip,
               status: 409,
-              url_solicitada: '/login',
+              url: '/login',
             },
             datos.email
           );
@@ -55,16 +51,16 @@ export class LoginController {
             nIntentos: this.intento,
           };
         } else {
-          const data = await this.loginService.validLogin(createLoginDto);
-          if (data === true) {
-            await this.loginService.resetearIntentos(datos.id);
-            await this.loginService.crearLogs(
+          const isValidLogin = await this.userService.validLogin(createLoginDto);
+          if (isValidLogin) {
+            await this.userService.resetearIntentos(datos.id);
+            await this.userService.crearLogs(
               {
                 accion: 'Inicio de sesión',
                 fecha: createLoginDto.fecha,
                 ip: createLoginDto.ip,
                 status: 200,
-                url_solicitada: '/login',
+                url: '/login',
               },
               datos.email
             );
@@ -82,7 +78,7 @@ export class LoginController {
         }
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error en validLogin:', error);
       return {
         message: 'Error en el servidor',
         status: HttpStatus.INTERNAL_SERVER_ERROR,

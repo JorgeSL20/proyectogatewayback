@@ -1,15 +1,13 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Auth, Informacion, Preguntas } from './entities/auth.entity';
 import * as bcryptjs from 'bcryptjs';
+import { Auth, Informacion, Preguntas} from './entities/auth.entity';
+import { Logs } from './entities/logs.entity';
+import { CreateAuthDto } from './dto/create-auth.dto';
 import { ValidarLogin } from './dto/ValidLoginDto-auth';
-import { CreateCitasDto } from './dto/create-cita.dto';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
-import { Logs } from './entities/logs.entity';
 
 @Injectable()
 export class AuthService {
@@ -26,11 +24,11 @@ export class AuthService {
 
   create(createAuthDto: CreateAuthDto) {
     const { password, ...resultado } = createAuthDto;
-    const newuser = this.authRepository.create({
+    const newUser = this.authRepository.create({
       password: bcryptjs.hashSync(password, 10),
       ...resultado,
     });
-    return this.authRepository.save(newuser);
+    return this.authRepository.save(newUser);
   }
 
   async login(user: Auth): Promise<{ token: number }> {
@@ -46,11 +44,11 @@ export class AuthService {
       },
     });
     const { ip, fecha_log, ...data } = updateAuthDto;
-    this.authRepository.update(id, data);
+    await this.authRepository.update(id, data);
 
-    this.crearLogs(
+    await this.crearLogs(
       {
-        accion: 'Se actualizo la informacion del usuario',
+        accion: 'Se actualizó la información del usuario',
         fecha: fecha_log,
         ip: ip,
         status: 200,
@@ -96,50 +94,43 @@ export class AuthService {
       },
     });
     if (password) {
-      const updateuser = this.authRepository.update(foundUser.id, {
+      const updateUser = this.authRepository.update(foundUser.id, {
         password: bcryptjs.hashSync(password, 10),
         ...data,
       });
-      return updateuser;
+      return updateUser;
     } else {
-      const updateuser = this.authRepository.update(foundUser.id, updateAuthDto);
-      return updateuser;
+      const updateUser = this.authRepository.update(foundUser.id, updateAuthDto);
+      return updateUser;
     }
   }
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
-    const data = await this.getUser(createLoginDto.email);
-    if (!data) {
-      return false; // El correo no es válido
+    try {
+      const data = await this.getUser(createLoginDto.email);
+      if (!data) {
+        return false; // El correo no es válido
+      }
+      const isPasswordValid = await bcryptjs.compare(createLoginDto.password, data.password);
+      return isPasswordValid;
+    } catch (error) {
+      console.error('Error en validLogin:', error);
+      throw new Error('Error en el servidor');
     }
-    const isPasswordValid = await bcryptjs.compare(createLoginDto.password, data.password);
-    return isPasswordValid;
-  }
-  
-  
-  findAll() {
-    return this.authRepository.find();
   }
 
-  findOne(id: string) {
-    return this.authRepository.findOne({
-      where: { email: id },
-    });
-  }
-
-  remove(id: number) {
-    return this.authRepository.delete({
-      id: id,
-    });
-  }
-
-  getUser(email: string) {
-    const user = this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
-    return user;
+  async getUser(email: string) {
+    try {
+      const user = await this.authRepository.findOne({
+        where: {
+          email: email,
+        },
+      });
+      return user;
+    } catch (error) {
+      console.error('Error en getUser:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async getUserById(id: string) {
@@ -247,8 +238,8 @@ export class AuthService {
   }
 
   async getAuth() {
-    const AuthFound = await this.authRepository.find();
-    return AuthFound;
+    const authFound = await this.authRepository.find();
+    return authFound;
   }
 
   async deleteUser(email: string) {
@@ -270,7 +261,7 @@ export class AuthService {
       usuario: userFound,
       ...data,
     });
-    this.logsRepository.save(newLog);
+    await this.logsRepository.save(newLog);
   }
 
   async validateToken(token: string): Promise<Auth | null> {
@@ -295,8 +286,25 @@ export class AuthService {
       if (user) {
         user.intentos = 0;
         await this.authRepository.save(user);
-        console.log("Intentos reseteados");
+        console.log('Intentos reseteados');
       }
     }, 300000);
+  }
+
+  async remove(id: number) {
+    const userToDelete = await this.authRepository.findOne({ where: { id } });
+    if (!userToDelete) {
+      throw new Error('Usuario no encontrado');
+    }
+    await this.authRepository.remove(userToDelete);
+    return { message: 'Usuario eliminado correctamente' };
+  }
+
+  async findAll() {
+    return this.authRepository.find();
+  }
+
+  async findOne(id: string) {
+    return this.authRepository.findOne({ where: { id: parseInt(id) } });
   }
 }
