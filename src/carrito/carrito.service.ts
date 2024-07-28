@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+// src/carrito/carrito.service.ts
+=======
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 import { Injectable, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -132,6 +136,8 @@ export class CarritoService {
       cantidad: item.cantidad
     }));
   }
+<<<<<<< HEAD
+=======
 
   // Nueva función para procesar el pago
   async procesarPago(pagoData: any) {
@@ -148,6 +154,7 @@ export class CarritoService {
       status: HttpStatus.OK,
     };
   }
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 
   async enviarConfirmacion(userId: number) {
     const usuario = await this.authRepository.findOne({ where: { id: userId } });
