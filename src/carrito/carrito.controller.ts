@@ -39,11 +39,16 @@ export class CarritoController {
   }
 
   @Post('procesar-pago')
-  async procesarPago(@Body() pagoData: any) {
-    return this.carritoService.procesarPago(pagoData);
+  async procesarPago(@Req() req) {
+    const userId = req.user.id;
+    return this.carritoService.procesarPago(userId);
   }
 
-  // Nuevo endpoint para enviar confirmación
+  @Post('capturar-pago/:orderId')
+  async capturarPago(@Param('orderId') orderId: string) {
+    return this.carritoService.capturarPago(orderId);
+  }
+
   @Post('enviar-confirmacion')
   async enviarConfirmacion(@Body('userId') userId: number) {
     return this.carritoService.enviarConfirmacion(userId);

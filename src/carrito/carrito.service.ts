@@ -5,6 +5,7 @@ import { Carrito } from './entities/carrito.entity';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
+import { PayPalService } from 'src/pago/pago.service';
 
 @Injectable()
 export class CarritoService {
@@ -15,6 +16,7 @@ export class CarritoService {
     private authRepository: Repository<Auth>,
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
+    private paypalService: PayPalService,
   ) {}
 
   async createOrUpdate(crearCarritoDto: CrearCarritoDto, userId: number) {
@@ -122,15 +124,43 @@ export class CarritoService {
     }));
   }
 
-  async procesarPago(pagoData: any) {
-    const { total, items } = pagoData;
+  async procesarPago(userId: number) {
+    const items = await this.findByUsuarioId(userId);
+    if (items.length === 0) {
+      throw new BadRequestException('El carrito está vacío');
+    }
 
-    console.log('Procesando pago', { total, items });
+    const total = items.reduce((acc, item) => acc + item.productoPrecio * item.cantidad, 0);
+    const order = await this.paypalService.createOrder(total, items);
+
+    // Guarda la orden en la base de datos
+    await this.guardarOrden(userId, order);
 
     return {
-      message: 'Pago procesado exitosamente',
+      orderId: order.id,
       status: HttpStatus.OK,
     };
+  }
+
+  async capturarPago(orderId: string) {
+    const capture = await this.paypalService.captureOrder(orderId);
+
+    // Guarda la captura en la base de datos
+    await this.guardarCaptura(orderId, capture);
+
+    return {
+      capture,
+      message: 'Pago capturado exitosamente',
+      status: HttpStatus.OK,
+    };
+  }
+
+  private async guardarOrden(userId: number, order: any) {
+    // Lógica para guardar la orden en la base de datos
+  }
+
+  private async guardarCaptura(orderId: string, capture: any) {
+    // Lógica para guardar la captura en la base de datos
   }
 
   async enviarConfirmacion(userId: number) {
