@@ -8,14 +8,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class CarruselController {
   constructor(private readonly carruselService: CarruselService) {}
 
-  @Post()
+  @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile() file: Express.Multer.File, @Body() createCarruselDto: CreateCarruselDto) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
     const result = await this.carruselService.uploadImage(file);
-    createCarruselDto.url = result.secure_url;
+    return { secure_url: result.secure_url };
+  }
+
+  @Post()
+  async create(@Body() createCarruselDto: CreateCarruselDto) {
     return this.carruselService.create(createCarruselDto);
   }
 
@@ -31,19 +35,8 @@ export class CarruselController {
   }
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('file'))
-  async update(
-    @Param('id') id: string,
-    @Body() updateCarruselDto: UpdateCarruselDto,
-    @UploadedFile() file: Express.Multer.File
-  ) {
+  async update(@Param('id') id: string, @Body() updateCarruselDto: UpdateCarruselDto) {
     const parsedId = parseInt(id, 10);
-
-    if (file) {
-      const result = await this.carruselService.uploadImage(file);
-      updateCarruselDto.url = result.secure_url;
-    }
-
     return this.carruselService.updateById(parsedId, updateCarruselDto);
   }
 
