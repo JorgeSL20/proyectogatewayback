@@ -2,11 +2,15 @@ import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from 
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { PagoService } from 'src/pago/pago.service';
 
 @Controller('carrito')
 @UseGuards(AuthGuard)
 export class CarritoController {
-  constructor(private readonly carritoService: CarritoService) {}
+  constructor(
+    private readonly carritoService: CarritoService,
+    private readonly pagoService: PagoService
+  ) {}
 
   @Post('agregar-o-actualizar')
   async agregarOActualizarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
@@ -39,18 +43,14 @@ export class CarritoController {
   }
 
   @Post('procesar-pago')
-  async procesarPago(@Req() req) {
+  async procesarPago(@Body() pagoData: any, @Req() req) {
     const userId = req.user.id;
-    return this.carritoService.procesarPago(userId);
+    return this.pagoService.procesarPago(pagoData, userId);
   }
 
-  @Post('capturar-pago/:orderId')
-  async capturarPago(@Param('orderId') orderId: string) {
-    return this.carritoService.capturarPago(orderId);
-  }
-
-  @Post('enviar-confirmacion')
-  async enviarConfirmacion(@Body('userId') userId: number) {
-    return this.carritoService.enviarConfirmacion(userId);
+  @Post('capturar-pago')
+  async capturarPago(@Body('orderId') orderId: string, @Req() req) {
+    const userId = req.user.id;
+    return this.pagoService.capturarPago(orderId, userId);
   }
 }
