@@ -8,6 +8,4 @@ export class Carrusel {
 
   @Column()
   url: string;
-
-
 }

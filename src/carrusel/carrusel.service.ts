@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Carrusel } from './entities/carrusel.entity';
 import { CreateCarruselDto } from './dto/create-carrusel.dto';
+import { UpdateCarruselDto } from './dto/update-carrusel.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import { Express } from 'express';
 
@@ -19,7 +20,7 @@ export class CarruselService {
     private carruselRepository: Repository<Carrusel>,
   ) {}
 
-  async uploadImage(file: Express.MulterFile): Promise<UploadApiResponse> {
+  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
@@ -40,6 +41,15 @@ export class CarruselService {
 
   async findAll(): Promise<Carrusel[]> {
     return this.carruselRepository.find();
+  }
+
+  async findOne(id: number): Promise<Carrusel> {
+    return this.carruselRepository.findOneBy({ id });
+  }
+
+  async updateById(id: number, updateCarruselDto: UpdateCarruselDto): Promise<Carrusel> {
+    await this.carruselRepository.update(id, updateCarruselDto);
+    return this.carruselRepository.findOneBy({ id });
   }
 
   async remove(id: number): Promise<void> {
