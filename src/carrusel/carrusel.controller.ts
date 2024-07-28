@@ -16,7 +16,7 @@ export class CarruselController {
     const result = await this.carruselService.uploadImage(file);
     const createCarruselDto: CreateCarruselDto = {
       url: result.secure_url,
-      publicId: result.public_id,
+      
     };
     return this.carruselService.create(createCarruselDto);
   }
