@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm"; 
-import { Logs } from "./logs.entity";
-import { Carrito } from "src/carrito/entities/carrito.entity";
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Logs } from './logs.entity';
+import { Carrito } from 'src/carrito/entities/carrito.entity';
+import { Pago } from 'src/pago/entities/pago.entity';
 
 @Entity({ name: 'usuarios' })
 export class Auth {
@@ -36,9 +37,12 @@ export class Auth {
 
     @OneToMany(() => Logs, logs => logs.usuario)
     logs: Logs[];
-    
+
     @OneToMany(() => Carrito, carrito => carrito.usuario)
     carritos: Carrito[];
+
+    @OneToMany(() => Pago, pago => pago.usuario)
+    pagos: Pago[];
 }
 
 

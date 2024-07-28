@@ -1,4 +1,3 @@
-// src/pago/pago.controller.ts
 import { Controller, Post, Body } from '@nestjs/common';
 import { PagoService } from './pago.service';
 
