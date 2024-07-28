@@ -38,9 +38,14 @@ export class CarritoController {
     return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
   }
 
-  // Nuevo endpoint para procesar el pago
   @Post('procesar-pago')
   async procesarPago(@Body() pagoData: any) {
     return this.carritoService.procesarPago(pagoData);
+  }
+
+  // Nuevo endpoint para enviar confirmación
+  @Post('enviar-confirmacion')
+  async enviarConfirmacion(@Body('userId') userId: number) {
+    return this.carritoService.enviarConfirmacion(userId);
   }
 }
