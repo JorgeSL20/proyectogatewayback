@@ -7,6 +7,7 @@ import { EmailModule } from './email/email.module';
 import { LoginModule } from './login/login.module';
 import { RecuperarPassModule } from './recuperar-pass/recuperar-pass.module';
 import { ProductoModule } from './producto/producto.module';
+import { UbicacionModule } from './ubicacion/ubicacion.module';
 import { MarcaModule } from './marca/marca.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { CarruselModule } from './carrusel/carrusel.module';
@@ -32,7 +33,7 @@ import { ConfigModule } from '@nestjs/config';
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
     
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule],
   controllers: [AppController],
   providers: [AppService],
 })
