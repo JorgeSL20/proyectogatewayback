@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/carrito/carrito.controller.ts
+=======
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
@@ -38,4 +41,13 @@ export class CarritoController {
   ) {
     return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
   }
+<<<<<<< HEAD
+=======
+
+  // Nuevo endpoint para procesar el pago
+  @Post('procesar-pago')
+  async procesarPago(@Body() pagoData: any) {
+    return this.carritoService.procesarPago(pagoData);
+  }
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 }

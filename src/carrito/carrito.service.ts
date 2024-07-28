@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/carrito/carrito.service.ts
+=======
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 import { Injectable, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -133,4 +136,23 @@ export class CarritoService {
       cantidad: item.cantidad
     }));
   }
+<<<<<<< HEAD
+=======
+
+  // Nueva función para procesar el pago
+  async procesarPago(pagoData: any) {
+    const { total, items } = pagoData;
+
+    // Aquí puedes implementar la lógica para procesar el pago,
+    // por ejemplo, integrando con un proveedor de pagos como PayPal o Stripe
+
+    console.log('Procesando pago', { total, items });
+
+    // Ejemplo de respuesta de pago exitoso
+    return {
+      message: 'Pago procesado exitosamente',
+      status: HttpStatus.OK,
+    };
+  }
+>>>>>>> f34bba903de50b7491cc1d89e6b06da8a76e8664
 }
