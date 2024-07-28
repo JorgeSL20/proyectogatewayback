@@ -28,22 +28,18 @@ export class CarritoService {
       throw new NotFoundException(`Producto con ID ${crearCarritoDto.productoId} no encontrado`);
     }
 
-    // Verificar existencia suficiente
     if (producto.existencias < crearCarritoDto.cantidad) {
       throw new BadRequestException(`No hay suficientes existencias del producto con ID ${crearCarritoDto.productoId}`);
     }
 
-    // Buscar si ya existe el ítem en el carrito del usuario
     let carritoItem = await this.carritoRepository.findOne({
       where: { usuario: { id: userId }, producto: { id: crearCarritoDto.productoId } },
       relations: ['usuario', 'producto'],
     });
 
     if (carritoItem) {
-      // Si ya existe, actualizar la cantidad
       carritoItem.cantidad += crearCarritoDto.cantidad;
 
-      // Actualizar existencias del producto
       producto.existencias -= crearCarritoDto.cantidad;
       if (producto.existencias < 0) {
         throw new BadRequestException(`No hay suficientes existencias del producto con ID ${crearCarritoDto.productoId}`);
@@ -52,14 +48,12 @@ export class CarritoService {
 
       return this.carritoRepository.save(carritoItem);
     } else {
-      // Si no existe, crear un nuevo ítem
       const newCarrito = this.carritoRepository.create({
         usuario: usuario,
         producto: producto,
         cantidad: crearCarritoDto.cantidad,
       });
 
-      // Actualizar existencias del producto
       producto.existencias -= crearCarritoDto.cantidad;
       await this.productoRepository.save(producto);
 
@@ -73,7 +67,6 @@ export class CarritoService {
       throw new NotFoundException(`Ítem del carrito con ID ${id} no encontrado`);
     }
 
-    // Devolver existencias al producto
     const producto = carritoItem.producto;
     producto.existencias += carritoItem.cantidad;
     await this.productoRepository.save(producto);
@@ -91,17 +84,14 @@ export class CarritoService {
       throw new NotFoundException(`Ítem del carrito con ID ${id} no encontrado`);
     }
 
-    // Obtener el producto
     const producto = carritoItem.producto;
 
-    // Actualizar existencias del producto
     producto.existencias += carritoItem.cantidad - nuevaCantidad;
     if (producto.existencias < 0) {
       throw new NotFoundException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
     }
     await this.productoRepository.save(producto);
 
-    // Actualizar la cantidad en el carrito
     carritoItem.cantidad = nuevaCantidad;
     await this.carritoRepository.save(carritoItem);
 
@@ -121,7 +111,6 @@ export class CarritoService {
       relations: ['usuario', 'producto'],
     });
 
-    // Map items to include detailed product information
     return items.map(item => ({
       id: item.id,
       usuarioId: item.usuario.id,
@@ -133,16 +122,11 @@ export class CarritoService {
     }));
   }
 
-  // Nueva función para procesar el pago
   async procesarPago(pagoData: any) {
     const { total, items } = pagoData;
 
-    // Aquí puedes implementar la lógica para procesar el pago,
-    // por ejemplo, integrando con un proveedor de pagos como PayPal o Stripe
-
     console.log('Procesando pago', { total, items });
 
-    // Ejemplo de respuesta de pago exitoso
     return {
       message: 'Pago procesado exitosamente',
       status: HttpStatus.OK,
