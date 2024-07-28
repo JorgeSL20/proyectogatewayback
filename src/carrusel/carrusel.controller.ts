@@ -40,10 +40,12 @@ export class CarruselController {
     return this.carruselService.updateById(parsedId, updateCarruselDto);
   }
 
+  // Cambia la respuesta de la función `remove` en el controlador por la siguiente
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const parsedId = parseInt(id, 10);
     await this.carruselService.remove(parsedId);
-    return `Carrusel con ID ${id} eliminado correctamente`;
+    return { message: `Carrusel con ID ${id} eliminado correctamente` };
   }
+
 }

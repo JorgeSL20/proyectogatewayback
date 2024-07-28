@@ -52,7 +52,22 @@ export class CarruselService {
     return this.carruselRepository.findOneBy({ id });
   }
 
-  async remove(id: number): Promise<void> {
+  // Agrega esta función en el servicio
+private extractPublicId(url: string): string {
+  const parts = url.split('/');
+  const lastPart = parts[parts.length - 1];
+  const publicId = lastPart.split('.')[0]; // Assuming the public ID is before the file extension
+  return publicId;
+}
+
+// Cambia la función `remove` por la siguiente
+async remove(id: number): Promise<void> {
+  const carrusel = await this.carruselRepository.findOneBy({ id });
+  if (carrusel && carrusel.url) {
+    const publicId = this.extractPublicId(carrusel.url);
+    await cloudinary.uploader.destroy(publicId);
     await this.carruselRepository.delete(id);
   }
+}
+
 }
