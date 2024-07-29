@@ -1,9 +1,7 @@
-import { IsString, IsOptional } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateMarcaDto } from './create-marca.dto';
+// update-marca.dto.ts
+import { IsString } from 'class-validator';
 
-export class UpdateMarcaDto extends PartialType(CreateMarcaDto) {
+export class UpdateMarcaDto {
   @IsString()
-  @IsOptional()
-  marca?: string;
+  marca: string;
 }
