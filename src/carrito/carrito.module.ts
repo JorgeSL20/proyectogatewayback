@@ -7,7 +7,7 @@ import { Producto } from 'src/producto/entities/producto.entity';
 import { CarritoService } from './carrito.service';
 import { CarritoController } from './carrito.controller';
 import { AuthModule } from 'src/auth/auth.module';  // Importa el AuthModule
-import { PagoModule } from 'src/pago/pago.module'; // Importa el PagoModule
+import { PagoModule } from 'src/pago/pago.module';  // Importa el PagoModule
 
 @Module({
   imports: [
