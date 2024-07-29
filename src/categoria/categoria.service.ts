@@ -1,10 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
+import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Categoria } from './entities/categoria.entity';
-
-
 
 @Injectable()
 export class CategoriaService {
@@ -21,23 +20,16 @@ export class CategoriaService {
   async remove(id: number) {
     return this.categoriaRepository.delete(id);
   }
-  
 
- /*  async updateById(id: number, updateMarcaDto: UpdateMarcaDto) {
-    await this.marcaRepository.update(id, { ...updateMarcaDto });
+  async updateById(id: number, updateCategoriaDto: UpdateCategoriaDto) {
+    await this.categoriaRepository.update(id, { ...updateCategoriaDto });
     return {
-      message: 'Marca actualizada correctamente',
+      message: 'Categoría actualizada correctamente',
       status: HttpStatus.OK,
     };
-  } */
+  }
 
   async findAll() {
     return this.categoriaRepository.find();
   }
-
-  // async findOne(id: number) {
-  //   return this.productoRepository.findOne(id);
-  // }
-
-  
 }
