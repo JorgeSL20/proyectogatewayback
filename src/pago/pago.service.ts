@@ -1,4 +1,3 @@
-// src/pago/pago.service.ts
 import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
@@ -32,7 +31,7 @@ export class PagoService {
     this.client = new paypal.core.PayPalHttpClient(this.environment);
   }
 
-  async procesarPago(pagoData: any, userId: number) {
+  async crearOrden(pagoData: any) {
     const { total, items } = pagoData;
 
     const request = new paypal.orders.OrdersCreateRequest();

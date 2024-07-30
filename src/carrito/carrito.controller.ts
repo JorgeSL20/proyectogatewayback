@@ -42,10 +42,10 @@ export class CarritoController {
     return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
   }
 
-  @Post('procesar-pago')
-  async procesarPago(@Body() pagoData: any, @Req() req) {
+  @Post('crear-orden')
+  async crearOrden(@Body() pagoData: any, @Req() req) {
     const userId = req.user.id;
-    return this.pagoService.procesarPago(pagoData, userId);
+    return this.pagoService.crearOrden(pagoData);
   }
 
   @Post('capturar-pago')
