@@ -2,15 +2,11 @@ import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from 
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { PagoService } from 'src/pago/pago.service';
 
 @Controller('carrito')
 @UseGuards(AuthGuard)
 export class CarritoController {
-  constructor(
-    private readonly carritoService: CarritoService,
-    private readonly pagoService: PagoService
-  ) {}
+  constructor(private readonly carritoService: CarritoService) {}
 
   @Post('agregar-o-actualizar')
   async agregarOActualizarItem(@Body() crearCarritoDto: CrearCarritoDto, @Req() req) {
@@ -35,22 +31,7 @@ export class CarritoController {
   }
 
   @Put('actualizar-cantidad/:id')
-  async actualizarCantidad(
-    @Param('id') id: string,
-    @Body('cantidad') cantidad: number
-  ) {
+  async actualizarCantidad(@Param('id') id: string, @Body('cantidad') cantidad: number) {
     return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
-  }
-
-  @Post('crear-orden')
-  async crearOrden(@Body() pagoData: any, @Req() req) {
-    const userId = req.user.id;
-    return this.pagoService.crearOrden(pagoData);
-  }
-
-  @Post('capturar-pago')
-  async capturarPago(@Body('orderId') orderId: string, @Req() req) {
-    const userId = req.user.id;
-    return this.pagoService.capturarPago(orderId, userId);
   }
 }

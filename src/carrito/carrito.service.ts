@@ -1,17 +1,14 @@
-import { Injectable, HttpStatus, NotFoundException, BadRequestException,forwardRef,Inject  } from '@nestjs/common';
+import { Injectable, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Carrito } from './entities/carrito.entity';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Producto } from 'src/producto/entities/producto.entity';
-import { PagoService } from 'src/pago/pago.service';
 
 @Injectable()
 export class CarritoService {
   constructor(
-    @Inject(forwardRef(() => PagoService)) 
-    private readonly pagoService: PagoService,
     @InjectRepository(Carrito)
     private carritoRepository: Repository<Carrito>,
     @InjectRepository(Auth)
@@ -123,32 +120,6 @@ export class CarritoService {
       productoPrecio: item.producto.precio,
       cantidad: item.cantidad
     }));
-  }
-
-  async procesarPago(pagoData: any) {
-    const { total, items } = pagoData;
-
-    console.log('Procesando pago', { total, items });
-
-    return {
-      message: 'Pago procesado exitosamente',
-      status: HttpStatus.OK,
-    };
-  }
-
-  async enviarConfirmacion(userId: number) {
-    const usuario = await this.authRepository.findOne({ where: { id: userId } });
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
-    }
-
-    // Aquí puedes agregar la lógica para enviar la confirmación
-    // Por ejemplo, enviar un correo electrónico con los detalles de la compra
-
-    return {
-      message: 'Confirmación enviada correctamente',
-      status: HttpStatus.OK,
-    };
   }
 
   async limpiarCarrito(usuarioId: number) {
