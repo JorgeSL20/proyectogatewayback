@@ -13,6 +13,7 @@ import { CategoriaModule } from './categoria/categoria.module';
 import { CarruselModule } from './carrusel/carrusel.module';
 import { CarritoModule } from './carrito/carrito.module';
 import { ConfigModule } from '@nestjs/config';
+import { SubcategoriaModule } from './subcategoria/subcategoria.module';
 
 
 
@@ -33,7 +34,7 @@ import { ConfigModule } from '@nestjs/config';
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
     
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule],
   controllers: [AppController],
   providers: [AppService],
 })

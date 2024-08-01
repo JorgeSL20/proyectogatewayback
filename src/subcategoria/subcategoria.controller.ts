@@ -3,7 +3,7 @@ import { SubcategoriaService } from './subcategoria.service';
 import { CreateSubcategoriaDto } from './dto/create-subcategoria.dto';
 import { UpdateSubcategoriaDto } from './dto/update-subcategoria.dto';
 
-@Controller('Subcategoria')
+@Controller('subcategoria') // Usa 'subcategoria' en minúsculas si es necesario
 export class SubcategoriaController {
   constructor(private readonly SubcategoriaService: SubcategoriaService) {}
 
@@ -29,3 +29,5 @@ export class SubcategoriaController {
     return this.SubcategoriaService.remove(parsedId);
   }
 }
+
+
