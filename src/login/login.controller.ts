@@ -68,7 +68,9 @@ export class LoginController {
               message: 'Login correcto',
               status: HttpStatus.OK,
               token: datos.id,
+              role: datos.role,  // Asumiendo que 'role' es una propiedad del usuario
             };
+            
           } else {
             return {
               message: 'Contraseña incorrecta',

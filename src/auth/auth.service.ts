@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcryptjs from 'bcryptjs';
-import { Auth, Informacion, Preguntas} from './entities/auth.entity';
+import { Auth, Informacion, Preguntas } from './entities/auth.entity';
 import { Logs } from './entities/logs.entity';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { ValidarLogin } from './dto/ValidLoginDto-auth';
@@ -27,26 +27,19 @@ export class AuthService {
     const newUser = this.authRepository.create({
       password: bcryptjs.hashSync(password, 10),
       ...resultado,
-      role: createAuthDto.role || 'user',  // Set role to 'user' if not provided
+      role: createAuthDto.role || 'user', // Set role to 'user' if not provided
     });
     return this.authRepository.save(newUser);
   }
 
   async login(user: Auth): Promise<{ token: number }> {
-    return {
-      token: user.id,
-    };
+    return { token: user.id };
   }
 
   async updateById(id: number, updateAuthDto: CreateAuthDto) {
-    const foundUser = await this.authRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
+    const foundUser = await this.authRepository.findOne({ where: { id } });
     const { ip, fecha_log, ...data } = updateAuthDto;
     await this.authRepository.update(id, data);
-
     await this.crearLogs(
       {
         accion: 'Se actualizó la información del usuario',
@@ -64,54 +57,42 @@ export class AuthService {
   }
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
-    const foundUser = await this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
-
-    if (!foundUser) {
-      throw new Error('Usuario no encontrado');
-    }
+    const foundUser = await this.authRepository.findOne({ where: { email } });
+    if (!foundUser) throw new Error('Usuario no encontrado');
     foundUser.password = bcryptjs.hashSync(data.password, 10);
-    const updatedUser = await this.authRepository.save(foundUser);
-    const newLog = this.logsRepository.create({
-      accion: 'Cambio de contraseña',
-      ip: data.ip,
-      url: 'auth/password/:email',
-      status: 200,
-      fecha: data.fecha,
-      usuario: foundUser,
-    });
-    await this.logsRepository.save(newLog);
-    return updatedUser;
+    await this.authRepository.save(foundUser);
+    await this.crearLogs(
+      {
+        accion: 'Cambio de contraseña',
+        ip: data.ip,
+        url: 'auth/password/:email',
+        status: 200,
+        fecha: data.fecha,
+      },
+      foundUser.email,
+    );
+    return { message: 'Contraseña actualizada correctamente' };
   }
 
   async update(email: string, updateAuthDto: CreateAuthDto) {
+    const foundUser = await this.authRepository.findOne({ where: { email } });
+    if (!foundUser) throw new Error('Usuario no encontrado');
     const { password, ...data } = updateAuthDto;
-    const foundUser = await this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
     if (password) {
-      const updateUser = this.authRepository.update(foundUser.id, {
+      await this.authRepository.update(foundUser.id, {
         password: bcryptjs.hashSync(password, 10),
         ...data,
       });
-      return updateUser;
     } else {
-      const updateUser = this.authRepository.update(foundUser.id, updateAuthDto);
-      return updateUser;
+      await this.authRepository.update(foundUser.id, updateAuthDto);
     }
+    return { message: 'Usuario actualizado correctamente' };
   }
 
   async validLogin(createLoginDto: ValidarLogin): Promise<boolean> {
     try {
       const data = await this.getUser(createLoginDto.email);
-      if (!data) {
-        return false; // El correo no es válido
-      }
+      if (!data) return false;
       const isPasswordValid = await bcryptjs.compare(createLoginDto.password, data.password);
       return isPasswordValid;
     } catch (error) {
@@ -122,11 +103,11 @@ export class AuthService {
 
   async getUser(email: string) {
     try {
-      const user = await this.authRepository.findOne({
-        where: {
-          email: email,
-        },
-      });
+      const user = await this.authRepository.findOne({ where: { email } });
+      if (!user) {
+        console.error(`Usuario no encontrado para el email: ${email}`);
+        return null;
+      }
       return user;
     } catch (error) {
       console.error('Error en getUser:', error);
@@ -135,177 +116,229 @@ export class AuthService {
   }
 
   async getUserById(id: string) {
-    const userFound = await this.authRepository.findOne({
-      where: {
-        id: parseInt(id),
-      },
-    });
-    return {
-      name: userFound.name,
-      lastNameP: userFound.lastNameP,
-      lastNameM: userFound.lastNameM,
-      email: userFound.email,
-      pregunta: userFound.pregunta,
-      respuesta: userFound.respuesta,
-    };
+    try {
+      const userFound = await this.authRepository.findOne({ where: { id: parseInt(id) } });
+      if (!userFound) throw new Error('Usuario no encontrado');
+      return {
+        name: userFound.name,
+        lastNameP: userFound.lastNameP,
+        lastNameM: userFound.lastNameM,
+        email: userFound.email,
+        pregunta: userFound.pregunta,
+        respuesta: userFound.respuesta,
+      };
+    } catch (error) {
+      console.error('Error en getUserById:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async getInformacionById(id: string) {
-    const informacionFound = await this.informacionRepository.findOne({
-      where: {
-        id_informacion: parseInt(id),
-      },
-    });
-    return {
-      mision: informacionFound.mision,
-      vision: informacionFound.vision,
-      quienessomos: informacionFound.quienessomos,
-    };
+    try {
+      const informacionFound = await this.informacionRepository.findOne({
+        where: { id_informacion: parseInt(id) },
+      });
+      if (!informacionFound) throw new Error('Información no encontrada');
+      return {
+        mision: informacionFound.mision,
+        vision: informacionFound.vision,
+        quienessomos: informacionFound.quienessomos,
+      };
+    } catch (error) {
+      console.error('Error en getInformacionById:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async updateInformacionById(id: string, updateInformacionDto: CreateInformacionDto) {
-    const informacionToUpdate = await this.informacionRepository.findOne({
-      where: {
-        id_informacion: parseInt(id),
-      },
-    });
-
-    if (!informacionToUpdate) {
+    try {
+      const informacionToUpdate = await this.informacionRepository.findOne({
+        where: { id_informacion: parseInt(id) },
+      });
+      if (!informacionToUpdate) {
+        return {
+          message: 'La información no fue encontrada',
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+      const updatedInformacion = await this.informacionRepository.merge(informacionToUpdate, updateInformacionDto);
+      await this.informacionRepository.save(updatedInformacion);
       return {
-        message: 'La información no fue encontrada',
-        status: HttpStatus.NOT_FOUND,
+        message: 'Información actualizada correctamente',
+        status: HttpStatus.OK,
       };
+    } catch (error) {
+      console.error('Error en updateInformacionById:', error);
+      throw new Error('Error en el servidor');
     }
-
-    const updatedInformacion = await this.informacionRepository.merge(informacionToUpdate, updateInformacionDto);
-    await this.informacionRepository.save(updatedInformacion);
-
-    return {
-      message: 'Información actualizada correctamente',
-      status: HttpStatus.OK,
-    };
   }
 
   async getPreguntas() {
-    const preguntasFound = await this.preguntasRepository.find();
-    return preguntasFound;
+    try {
+      return await this.preguntasRepository.find();
+    } catch (error) {
+      console.error('Error en getPreguntas:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async updatePreguntasById(id: string, updatePreguntasDto: CreatePreguntasDto) {
-    const preguntasToUpdate = await this.preguntasRepository.findOne({
-      where: {
-        id_preguntas: parseInt(id),
-      },
-    });
-
-    if (!preguntasToUpdate) {
+    try {
+      const preguntasToUpdate = await this.preguntasRepository.findOne({
+        where: { id_preguntas: parseInt(id) },
+      });
+      if (!preguntasToUpdate) {
+        return {
+          message: 'La pregunta no fue encontrada',
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+      const updatedPreguntas = await this.preguntasRepository.merge(preguntasToUpdate, updatePreguntasDto);
+      await this.preguntasRepository.save(updatedPreguntas);
       return {
-        message: 'La pregunta no fue encontrada',
-        status: HttpStatus.NOT_FOUND,
+        message: 'Pregunta actualizada correctamente',
+        status: HttpStatus.OK,
       };
+    } catch (error) {
+      console.error('Error en updatePreguntasById:', error);
+      throw new Error('Error en el servidor');
     }
-
-    const updatedPreguntas = await this.preguntasRepository.merge(preguntasToUpdate, updatePreguntasDto);
-    await this.preguntasRepository.save(updatedPreguntas);
-
-    return {
-      message: 'Pregunta actualizada correctamente',
-      status: HttpStatus.OK,
-    };
   }
 
   async createPreguntas(createPreguntasDto: CreatePreguntasDto) {
-    const nuevaPregunta = this.preguntasRepository.create(createPreguntasDto);
-    await this.preguntasRepository.save(nuevaPregunta);
-    return {
-      message: 'Pregunta creada correctamente',
-      status: HttpStatus.CREATED,
-    };
+    try {
+      const nuevaPregunta = this.preguntasRepository.create(createPreguntasDto);
+      await this.preguntasRepository.save(nuevaPregunta);
+      return {
+        message: 'Pregunta creada correctamente',
+        status: HttpStatus.CREATED,
+      };
+    } catch (error) {
+      console.error('Error en createPreguntas:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async deletePregunta(id: number) {
-    const preguntaExistente = await this.preguntasRepository.findOne({ where: { id_preguntas: id } });
-    if (!preguntaExistente) {
+    try {
+      const preguntaExistente = await this.preguntasRepository.findOne({ where: { id_preguntas: id } });
+      if (!preguntaExistente) {
+        return {
+          message: 'La pregunta no fue encontrada',
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+      await this.preguntasRepository.remove(preguntaExistente);
       return {
-        message: 'La pregunta no fue encontrada',
-        status: HttpStatus.NOT_FOUND,
+        message: 'Pregunta eliminada correctamente',
+        status: HttpStatus.OK,
       };
+    } catch (error) {
+      console.error('Error en deletePregunta:', error);
+      throw new Error('Error en el servidor');
     }
-    await this.preguntasRepository.remove(preguntaExistente);
-    return {
-      message: 'Pregunta eliminada correctamente',
-      status: HttpStatus.OK,
-    };
   }
 
   async getAuth() {
-    const authFound = await this.authRepository.find();
-    return authFound;
+    try {
+      return await this.authRepository.find();
+    } catch (error) {
+      console.error('Error en getAuth:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async deleteUser(email: string) {
-    const userToDelete = await this.authRepository.findOne({ where: { email } });
-    if (!userToDelete) {
-      throw new Error('Usuario no encontrado');
+    try {
+      const userToDelete = await this.authRepository.findOne({ where: { email } });
+      if (!userToDelete) throw new Error('Usuario no encontrado');
+      await this.authRepository.remove(userToDelete);
+      return { message: 'Usuario eliminado correctamente' };
+    } catch (error) {
+      console.error('Error en deleteUser:', error);
+      throw new Error('Error en el servidor');
     }
-    await this.authRepository.remove(userToDelete);
-    return { message: 'Usuario eliminado correctamente' };
   }
 
   async crearLogs(data: { accion: string; ip: string; url: string; status: number; fecha: string }, email: string) {
-    const userFound = await this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
-    const newLog = this.logsRepository.create({
-      usuario: userFound,
-      ...data,
-    });
-    await this.logsRepository.save(newLog);
+    try {
+      const userFound = await this.authRepository.findOne({ where: { email } });
+      if (!userFound) throw new Error('Usuario no encontrado');
+      const newLog = this.logsRepository.create({ usuario: userFound, ...data });
+      await this.logsRepository.save(newLog);
+    } catch (error) {
+      console.error('Error en crearLogs:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async validateToken(token: string): Promise<Auth | null> {
-    const userId = parseInt(token, 10);
-    if (isNaN(userId)) {
-      return null;
+    try {
+      const userId = parseInt(token, 10);
+      if (isNaN(userId)) return null;
+      return await this.authRepository.findOne({ where: { id: userId } });
+    } catch (error) {
+      console.error('Error en validateToken:', error);
+      throw new Error('Error en el servidor');
     }
-    return this.authRepository.findOne({ where: { id: userId } });
   }
 
   async asignarIntentos(id: number, intento: number) {
-    const user = await this.authRepository.findOne({ where: { id } });
-    if (user) {
-      user.intentos = intento;
-      await this.authRepository.save(user);
+    try {
+      const user = await this.authRepository.findOne({ where: { id } });
+      if (user) {
+        user.intentos = intento;
+        await this.authRepository.save(user);
+      }
+    } catch (error) {
+      console.error('Error en asignarIntentos:', error);
+      throw new Error('Error en el servidor');
     }
   }
 
   async resetearIntentos(id: number) {
     setTimeout(async () => {
-      const user = await this.authRepository.findOne({ where: { id } });
-      if (user) {
-        user.intentos = 0;
-        await this.authRepository.save(user);
-        console.log('Intentos reseteados');
+      try {
+        const user = await this.authRepository.findOne({ where: { id } });
+        if (user) {
+          user.intentos = 0;
+          await this.authRepository.save(user);
+          console.log('Intentos reseteados');
+        }
+      } catch (error) {
+        console.error('Error en resetearIntentos:', error);
+        throw new Error('Error en el servidor');
       }
     }, 300000);
   }
 
   async remove(id: number) {
-    const userToDelete = await this.authRepository.findOne({ where: { id } });
-    if (!userToDelete) {
-      throw new Error('Usuario no encontrado');
+    try {
+      const userToDelete = await this.authRepository.findOne({ where: { id } });
+      if (!userToDelete) throw new Error('Usuario no encontrado');
+      await this.authRepository.remove(userToDelete);
+      return { message: 'Usuario eliminado correctamente' };
+    } catch (error) {
+      console.error('Error en remove:', error);
+      throw new Error('Error en el servidor');
     }
-    await this.authRepository.remove(userToDelete);
-    return { message: 'Usuario eliminado correctamente' };
   }
 
   async findAll() {
-    return this.authRepository.find();
+    try {
+      return await this.authRepository.find();
+    } catch (error) {
+      console.error('Error en findAll:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 
   async findOne(id: string) {
-    return this.authRepository.findOne({ where: { id: parseInt(id) } });
+    try {
+      return await this.authRepository.findOne({ where: { id: parseInt(id) } });
+    } catch (error) {
+      console.error('Error en findOne:', error);
+      throw new Error('Error en el servidor');
+    }
   }
 }
