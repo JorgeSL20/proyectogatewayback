@@ -103,6 +103,7 @@ export class AuthService {
 
   async getUser(email: string) {
     try {
+      console.log(`Buscando usuario con email: ${email}`);
       const user = await this.authRepository.findOne({ where: { email } });
       if (!user) {
         console.error(`Usuario no encontrado para el email: ${email}`);

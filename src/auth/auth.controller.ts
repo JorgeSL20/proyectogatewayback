@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards,HttpStatus  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -28,6 +28,28 @@ export class AuthController {
   update(@Param('email') email: string, @Body() updateAuthDto: CreateAuthDto) {
     console.log(updateAuthDto)
     return this.authService.update(email, updateAuthDto);
+  }
+  @Get(':email')
+  async getUserByEmail(@Param('email') email: string) {
+    try {
+      const user = await this.authService.getUser(email);
+      if (!user) {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Usuario no encontrado',
+        };
+      }
+      return {
+        statusCode: HttpStatus.OK,
+        data: user,
+      };
+    } catch (error) {
+      console.error('Error en getUserByEmail:', error);
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Error en el servidor',
+      };
+    }
   }
   @Patch('password/:email')
   updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password:string,ip:string,fecha:string}) {
