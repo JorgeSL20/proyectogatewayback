@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLoginDto } from './dto/create-login.dto';
-import { UpdateLoginDto } from './dto/update-login.dto';
 import { ValidarLogin } from 'src/auth/dto/ValidLoginDto-auth';
 import * as bcryptjs from 'bcryptjs';
 import { AuthService } from 'src/auth/auth.service';
@@ -8,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Repository } from 'typeorm';
 import { Logs } from 'src/auth/entities/logs.entity';
+
 @Injectable()
 export class LoginService {
   constructor(

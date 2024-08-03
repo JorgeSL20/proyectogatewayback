@@ -9,6 +9,7 @@ export class CreateAuthDto {
     respuesta: string;
     ip:string;
     fecha_log?:string;
+    role?: string; 
 }
 
 export class CreateInformacionDto{

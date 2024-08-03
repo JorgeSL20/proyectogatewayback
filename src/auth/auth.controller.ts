@@ -1,22 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RolesGuard } from './roles.guard';
+import { Roles } from './entities/roles.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 //usuarios
-  @Post()
+@Post()
   create(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.create(createAuthDto);
   }
-  
 
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @Get()
   findAll() {
     return this.authService.findAll();
   }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authService.findOne(id);

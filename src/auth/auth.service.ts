@@ -27,6 +27,7 @@ export class AuthService {
     const newUser = this.authRepository.create({
       password: bcryptjs.hashSync(password, 10),
       ...resultado,
+      role: createAuthDto.role || 'user',  // Set role to 'user' if not provided
     });
     return this.authRepository.save(newUser);
   }
