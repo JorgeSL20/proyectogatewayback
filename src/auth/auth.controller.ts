@@ -20,16 +20,16 @@ export class AuthController {
     return this.authService.findAll();
   }
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(id);
-  }
+findOne(@Param('id') id: string) {
+  return this.authService.findOne(id);
+}
 
   @Patch(':email')
   update(@Param('email') email: string, @Body() updateAuthDto: CreateAuthDto) {
     console.log(updateAuthDto)
     return this.authService.update(email, updateAuthDto);
   }
-  @Get(':email')
+  @Get('email/:email')
   async getUserByEmail(@Param('email') email: string) {
     try {
       const user = await this.authService.getUser(email);
@@ -51,6 +51,7 @@ export class AuthController {
       };
     }
   }
+  
   @Patch('password/:email')
   updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password:string,ip:string,fecha:string}) {
     console.log(updateAuthDto)
