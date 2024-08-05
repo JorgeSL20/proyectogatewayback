@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards,HttpStatus  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards,HttpStatus,Res  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './entities/roles.decorator';
+import { Auth } from './entities/auth.entity';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -29,29 +30,24 @@ findOne(@Param('id') id: string) {
     console.log(updateAuthDto)
     return this.authService.update(email, updateAuthDto);
   }
-  @Get('email/:email')
-  async getUserByEmail(@Param('email') email: string) {
+  @Get(':email')
+  async getUserByEmail(@Param('email') email: string, @Res() res) {
     try {
-      const user = await this.authService.getUser(email);
+      const user = await this.authService.getUserByEmail(email);
       if (!user) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: 'Usuario no encontrado',
-        };
+        return res.status(HttpStatus.NOT_FOUND).json({
+          statusCode: 404,
+          message: 'User not found',
+        });
       }
-      return {
-        statusCode: HttpStatus.OK,
-        data: user,
-      };
+      return res.status(HttpStatus.OK).json(user);
     } catch (error) {
-      console.error('Error en getUserByEmail:', error);
-      return {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Error en el servidor',
-      };
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Internal server error',
+      });
     }
   }
-  
   @Patch('password/:email')
   updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password:string,ip:string,fecha:string}) {
     console.log(updateAuthDto)
@@ -109,5 +105,7 @@ getAuth() {
 deleteUser(@Param('email') email: string) { // Captura el parámetro email de la URL
   return this.authService.deleteUser(email); // Llama al método correspondiente en el servicio y pasa el email
 }
+
+
 
 }

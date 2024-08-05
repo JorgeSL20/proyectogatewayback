@@ -9,6 +9,7 @@ import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -341,5 +342,9 @@ export class AuthService {
       console.error('Error en findOne:', error);
       throw new Error('Error en el servidor');
     }
+  }
+
+  async getUserByEmail(email: string): Promise<Auth> {
+    return await this.authRepository.findOne({ where: { email } });
   }
 }
