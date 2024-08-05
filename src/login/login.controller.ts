@@ -68,6 +68,7 @@ export class LoginController {
               message: 'Login correcto',
               status: HttpStatus.OK,
               token: datos.id,
+              role: datos.role,
             };
           } else {
             return {
