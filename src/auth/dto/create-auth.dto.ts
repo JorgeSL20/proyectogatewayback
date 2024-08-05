@@ -7,8 +7,9 @@ export class CreateAuthDto {
     password: string;
     pregunta: string;
     respuesta: string;
-    ip:string;
-    fecha_log?:string;
+    ip: string;
+    fecha_log?: string;
+    role?: string; // Añadido para permitir el rol
 }
 
 export class CreateInformacionDto{
