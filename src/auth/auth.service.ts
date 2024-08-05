@@ -40,9 +40,11 @@ export class AuthService {
 
   async updateById(id: number, updateAuthDto: CreateAuthDto) {
     try {
+        console.log('Received update request:', updateAuthDto);
+
         const foundUser = await this.authRepository.findOne({ where: { id } });
-        
         if (!foundUser) {
+            console.log('User not found');
             return {
                 message: 'Usuario no encontrado',
                 status: HttpStatus.NOT_FOUND,
@@ -50,6 +52,7 @@ export class AuthService {
         }
 
         const { ip, fecha_log, ...data } = updateAuthDto;
+        console.log('Data to update:', data);
         await this.authRepository.update(id, data);
 
         await this.crearLogs({
@@ -65,13 +68,15 @@ export class AuthService {
             status: HttpStatus.OK,
         };
     } catch (error) {
-        console.error('Error en updateById:', error);
+        console.error('Error en updateById:', error);  // Muestra el mensaje de error
+        console.error('Full error stack:', error);  // Muestra el stack completo del error
         return {
             message: 'Error en el servidor',
             status: HttpStatus.INTERNAL_SERVER_ERROR,
         };
     }
 }
+
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
     const foundUser = await this.authRepository.findOne({ where: { email } });
