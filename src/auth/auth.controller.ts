@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards,HttpStatus  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UseGuards,HttpStatus,HttpException  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -61,7 +61,7 @@ async getUserByEmail(@Param('email') email: string) {
     async updateById(@Param('id') id: string, @Body() updateAuthDto: CreateAuthDto) {
         const result = await this.authService.updateById(parseInt(id), updateAuthDto);
         if (result.status !== HttpStatus.OK) {
-            throw new Error(result.message);
+            throw new HttpException(result.message, result.status);
         }
         return result;
     }

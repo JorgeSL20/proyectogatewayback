@@ -40,9 +40,7 @@ export class AuthService {
 
   async updateById(id: number, updateAuthDto: CreateAuthDto) {
     try {
-        const foundUser = await this.authRepository.findOne({
-            where: { id },
-        });
+        const foundUser = await this.authRepository.findOne({ where: { id } });
         
         if (!foundUser) {
             return {
@@ -59,7 +57,7 @@ export class AuthService {
             fecha: fecha_log,
             ip,
             status: HttpStatus.OK,
-            url: 'auth/perfil/:id',
+            url: `auth/perfil/${id}`,
         }, foundUser.email);
 
         return {
