@@ -38,29 +38,46 @@ export class AuthService {
   }
 
   async updateById(id: number, updateAuthDto: CreateAuthDto) {
-    const foundUser = await this.authRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
-    const { ip, fecha_log, ...data } = updateAuthDto;
-    await this.authRepository.update(id, data);
+    try {
+        const foundUser = await this.authRepository.findOne({ where: { id } });
+        if (!foundUser) {
+            return {
+                message: 'Usuario no encontrado',
+                status: HttpStatus.NOT_FOUND,
+            };
+        }
 
-    await this.crearLogs(
-      {
-        accion: 'Se actualizó la información del usuario',
-        fecha: fecha_log,
-        ip: ip,
-        status: 200,
-        url: 'auth/perfil/:id',
-      },
-      foundUser.email,
-    );
-    return {
-      message: 'Usuario actualizado correctamente',
-      status: HttpStatus.OK,
-    };
-  }
+        const { ip, fecha_log, ...data } = updateAuthDto;
+        await this.authRepository.update(id, data);
+
+        console.log('Datos actualizados para el usuario:', data);
+
+        try {
+            await this.crearLogs({
+                accion: 'Se actualizó la información del usuario',
+                fecha: fecha_log,
+                ip,
+                status: HttpStatus.OK,
+                url: `auth/perfil/${id}`,
+            }, foundUser.email);
+        } catch (logError) {
+            console.error('Error al crear el log:', logError);
+        }
+
+        return {
+            message: 'Usuario actualizado correctamente',
+            status: HttpStatus.OK,
+        };
+    } catch (error) {
+        console.error('Error en updateById:', error);
+        console.error('Full error stack:', error);
+        return {
+            message: 'Error en el servidor',
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+    }
+}
+
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
     const foundUser = await this.authRepository.findOne({
@@ -252,17 +269,29 @@ export class AuthService {
   }
 
   async crearLogs(data: { accion: string; ip: string; url: string; status: number; fecha: string }, email: string) {
-    const userFound = await this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
-    const newLog = this.logsRepository.create({
-      usuario: userFound,
-      ...data,
-    });
-    await this.logsRepository.save(newLog);
-  }
+    try {
+        const userFound = await this.authRepository.findOne({
+            where: {
+                email: email,
+            },
+        });
+
+        if (!userFound) {
+            throw new Error('Usuario no encontrado para crear el log');
+        }
+
+        const newLog = this.logsRepository.create({
+            usuario: userFound,
+            ...data,
+        });
+
+        await this.logsRepository.save(newLog);
+    } catch (error) {
+        console.error('Error en crearLogs:', error);
+        console.error('Full error stack:', error);
+        throw new Error('Error al crear el log');
+    }
+}
 
   async validateToken(token: string): Promise<Auth | null> {
     const userId = parseInt(token, 10);
