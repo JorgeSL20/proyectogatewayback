@@ -1,3 +1,5 @@
+// auth.service.ts
+
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +10,6 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
-
 
 @Injectable()
 export class AuthService {
@@ -263,16 +264,11 @@ export class AuthService {
   }
 
   async crearLogs(data: { accion: string; ip: string; url: string; status: number; fecha: string }, email: string) {
-    try {
-      const userFound = await this.authRepository.findOne({ where: { email } });
-      if (!userFound) throw new Error('Usuario no encontrado');
-      const newLog = this.logsRepository.create({ usuario: userFound, ...data });
-      await this.logsRepository.save(newLog);
-    } catch (error) {
-      console.error('Error en crearLogs:', error);
-      throw new Error('Error en el servidor');
-    }
+    const user = await this.authRepository.findOne({ where: { email } });
+    const logs = this.logsRepository.create({ ...data, usuario: user });
+    return this.logsRepository.save(logs);
   }
+
 
   async validateToken(token: string): Promise<Auth | null> {
     try {
