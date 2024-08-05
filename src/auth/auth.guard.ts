@@ -21,5 +21,4 @@ export class AuthGuard implements CanActivate {
     request.user = { id: token }; // Si el token es el userId, lo asignamos directamente
     return true;
   }
-  
 }

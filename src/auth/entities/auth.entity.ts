@@ -1,4 +1,3 @@
-// src/auth/entities/auth.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Logs } from './logs.entity';
 import { Carrito } from 'src/carrito/entities/carrito.entity';
@@ -35,9 +34,6 @@ export class Auth {
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     lastAttempt: Date;
-
-    @Column({ default: 'admin' })
-    role: string;
 
     @OneToMany(() => Logs, logs => logs.usuario)
     logs: Logs[];
