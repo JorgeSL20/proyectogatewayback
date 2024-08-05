@@ -39,24 +39,41 @@ export class AuthService {
   }
 
   async updateById(id: number, updateAuthDto: CreateAuthDto) {
-    const foundUser = await this.authRepository.findOne({ where: { id } });
-    const { ip, fecha_log, ...data } = updateAuthDto;
-    await this.authRepository.update(id, data);
-    await this.crearLogs(
-      {
-        accion: 'Se actualizó la información del usuario',
-        fecha: fecha_log,
-        ip: ip,
-        status: 200,
-        url: 'auth/perfil/:id',
-      },
-      foundUser.email,
-    );
-    return {
-      message: 'Usuario actualizado correctamente',
-      status: HttpStatus.OK,
-    };
-  }
+    try {
+        const foundUser = await this.authRepository.findOne({
+            where: { id },
+        });
+        
+        if (!foundUser) {
+            return {
+                message: 'Usuario no encontrado',
+                status: HttpStatus.NOT_FOUND,
+            };
+        }
+
+        const { ip, fecha_log, ...data } = updateAuthDto;
+        await this.authRepository.update(id, data);
+
+        await this.crearLogs({
+            accion: 'Se actualizó la información del usuario',
+            fecha: fecha_log,
+            ip,
+            status: HttpStatus.OK,
+            url: 'auth/perfil/:id',
+        }, foundUser.email);
+
+        return {
+            message: 'Usuario actualizado correctamente',
+            status: HttpStatus.OK,
+        };
+    } catch (error) {
+        console.error('Error en updateById:', error);
+        return {
+            message: 'Error en el servidor',
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+    }
+}
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
     const foundUser = await this.authRepository.findOne({ where: { email } });
