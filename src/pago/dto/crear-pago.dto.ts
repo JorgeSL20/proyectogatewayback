@@ -1,7 +1,6 @@
-// src/pago/dto/create-pago.dto.ts
 export class CreatePagoDto {
-  id:number;
+  id: number;
   usuarioId: number;
-  total:number;
-  items:string;
+  total: number;
+  items: string;
 }

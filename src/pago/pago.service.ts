@@ -72,30 +72,30 @@ export class PagoService {
     try {
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
       request.requestBody({});
-
+      
       const response = await this.client.execute(request);
-
+  
       const usuario = await this.authRepository.findOne({ where: { id: userId } });
       if (!usuario) {
         throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
       }
-
+  
       const pago = this.pagoRepository.create({
         usuario,
         total: parseFloat(response.result.purchase_units[0].amount.value),
         items: response.result.purchase_units[0].items,
       });
-
+  
       await this.pagoRepository.save(pago);
       await this.carritoService.limpiarCarrito(userId);
-
+  
       return {
         message: 'Pago capturado y guardado exitosamente',
         status: HttpStatus.OK,
       };
     } catch (error) {
-      console.error('Error al capturar el pago de PayPal:', (error as Error).message);
+      console.error('Error al capturar el pago de PayPal:', error);
       throw new Error('Error al capturar el pago de PayPal');
     }
-  }
+  }  
 }

@@ -1,4 +1,3 @@
-// src/pago/entities/pago.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Auth } from 'src/auth/entities/auth.entity';
 
