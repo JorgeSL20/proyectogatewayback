@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus,InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
 import { Repository } from 'typeorm';
@@ -68,28 +68,39 @@ export class PagoService {
     }
   }
 
-  async capturarPago(orderId: string, userId: string): Promise<any> {
+  async capturarPago(orderId: string, userId: number) {
     try {
-      // Configura PayPal
-      const clientId = process.env.PAYPAL_CLIENT_ID;
-      const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-      const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
-      const client = new paypal.core.PayPalHttpClient(environment);
-
-      // Captura el pago
+      // Capturar el pago de la orden de PayPal
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
-      const response = await client.execute(request);
+      request.requestBody({});
       
-      // Procesa la respuesta
-      if (response.result.status === 'COMPLETED') {
-        // Aquí puedes guardar el pago en la base de datos
-        return response.result;
-      } else {
-        throw new Error('Error capturando el pago');
+      const response = await this.client.execute(request);
+
+      // Obtener el usuario desde la base de datos
+      const usuario = await this.authRepository.findOne({ where: { id: userId } });
+      if (!usuario) {
+        throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
       }
+
+      // Crear y guardar el registro del pago en la base de datos
+      const pago = this.pagoRepository.create({
+        usuario,
+        total: parseFloat(response.result.purchase_units[0].amount.value),
+        items: response.result.purchase_units[0].items,
+      });
+  
+      await this.pagoRepository.save(pago);
+  
+      // Limpiar el carrito del usuario
+      await this.carritoService.limpiarCarrito(userId);
+  
+      return {
+        message: 'Pago capturado y guardado exitosamente',
+        status: HttpStatus.OK,
+      };
     } catch (error) {
-      console.error('Error en capturarPago:', error);
-      throw new InternalServerErrorException('Error capturando el pago');
+      console.error('Error al capturar el pago de PayPal:', (error as Error).message);
+      throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
-  }
+  }  
 }
