@@ -15,7 +15,9 @@ export class PagoController {
 
   @Post('capturar-pago')
   async capturarPago(@Body('orderId') orderId: string, @Req() req) {
-    const userId = req.user.id;
-    return this.pagoService.capturarPago(orderId, userId);
-  }
+  console.log(`Order ID: ${orderId}`);
+  const userId = req.user.id;
+  return this.pagoService.capturarPago(orderId, userId);
+}
+
 }

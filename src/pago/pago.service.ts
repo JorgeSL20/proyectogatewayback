@@ -94,8 +94,8 @@ export class PagoService {
         status: HttpStatus.OK,
       };
     } catch (error) {
-      console.error('Error al capturar el pago de PayPal:', error);
-      throw new Error('Error al capturar el pago de PayPal');
+      console.error('Error al capturar el pago de PayPal:', (error as Error).message);
+      throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
   }  
 }
