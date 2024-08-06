@@ -1,4 +1,5 @@
-import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
+// src/pago/pago.service.ts
+import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
 import { Repository } from 'typeorm';
@@ -95,7 +96,7 @@ export class PagoService {
       };
     } catch (error) {
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
-      throw new Error('Error al capturar el pago de PayPal');
+      throw new InternalServerErrorException('Error al capturar el pago de PayPal');
     }
   }
 }
