@@ -1,8 +1,7 @@
 // src/pago/dto/create-pago.dto.ts
 export class CreatePagoDto {
+  id:number;
   usuarioId: number;
-  monto: number;
-  metodoPago: string;
-  estado: string;
-  detalles?: string;
+  total:number;
+  items:string;
 }
