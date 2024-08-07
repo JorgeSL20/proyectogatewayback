@@ -88,7 +88,7 @@ export class CarritoService {
 
     producto.existencias += carritoItem.cantidad - nuevaCantidad;
     if (producto.existencias < 0) {
-      throw new NotFoundException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
+      throw new BadRequestException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
     }
     await this.productoRepository.save(producto);
 
@@ -140,5 +140,23 @@ export class CarritoService {
     }
 
     await this.carritoRepository.delete({ usuario: { id: userId } });
+  }
+
+  async procesarPago(userId: number): Promise<void> {
+    if (!userId) {
+      throw new BadRequestException('ID de usuario inválido');
+    }
+
+    const items = await this.carritoRepository.find({ where: { usuario: { id: userId } }, relations: ['producto'] });
+
+    if (items.length === 0) {
+      throw new NotFoundException('Carrito vacío o no encontrado');
+    }
+
+    // Aquí podrías agregar la lógica para procesar el pago con PayPal
+    // Supongamos que el pago fue exitoso
+
+    // Vaciar el carrito y actualizar las existencias
+    await this.limpiarCarrito(userId);
   }
 }
