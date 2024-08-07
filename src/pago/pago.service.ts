@@ -1,3 +1,4 @@
+// pago.service.ts
 import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
@@ -8,7 +9,7 @@ import { Auth } from 'src/auth/entities/auth.entity';
 
 @Injectable()
 export class PagoService {
-  private environment: paypal.core.LiveEnvironment | paypal.core.SandboxEnvironment;
+  private environment: paypal.core.LiveEnvironment;
   private client: paypal.core.PayPalHttpClient;
 
   constructor(
@@ -17,17 +18,10 @@ export class PagoService {
     @InjectRepository(Pago) private pagoRepository: Repository<Pago>,
     @InjectRepository(Auth) private authRepository: Repository<Auth>,
   ) {
-    const clientId = process.env.PAYPAL_LIVE_MODE === 'true'
-      ? process.env.PAYPAL_CLIENT_ID_LIVE
-      : process.env.PAYPAL_CLIENT_ID_SANDBOX;
-    const clientSecret = process.env.PAYPAL_LIVE_MODE === 'true'
-      ? process.env.PAYPAL_CLIENT_SECRET_LIVE
-      : process.env.PAYPAL_CLIENT_SECRET_SANDBOX;
+    const clientId = process.env.PAYPAL_CLIENT_ID_LIVE;
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET_LIVE;
 
-    this.environment = process.env.PAYPAL_LIVE_MODE === 'true'
-      ? new paypal.core.LiveEnvironment(clientId, clientSecret)
-      : new paypal.core.SandboxEnvironment(clientId, clientSecret);
-
+    this.environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
     this.client = new paypal.core.PayPalHttpClient(this.environment);
   }
 
@@ -70,19 +64,16 @@ export class PagoService {
 
   async capturarPago(orderId: string, userId: number) {
     try {
-      // Capturar el pago de la orden de PayPal
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
       request.requestBody({});
       
       const response = await this.client.execute(request);
 
-      // Obtener el usuario desde la base de datos
       const usuario = await this.authRepository.findOne({ where: { id: userId } });
       if (!usuario) {
         throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
       }
 
-      // Crear y guardar el registro del pago en la base de datos
       const pago = this.pagoRepository.create({
         usuario,
         total: parseFloat(response.result.purchase_units[0].amount.value),
@@ -91,7 +82,6 @@ export class PagoService {
   
       await this.pagoRepository.save(pago);
   
-      // Limpiar el carrito del usuario
       await this.carritoService.limpiarCarrito(userId);
   
       return {
