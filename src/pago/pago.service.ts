@@ -65,6 +65,17 @@ export class PagoService {
 
   async capturarPago(orderId: string, userId: number) {
     try {
+      // Verificar el estado de la orden
+      const orderRequest = new paypal.orders.OrdersGetRequest(orderId);
+      const orderResponse = await this.client.execute(orderRequest);
+      
+      if (orderResponse.result.status === 'COMPLETED') {
+        return {
+          message: 'La orden ya ha sido capturada previamente.',
+          status: HttpStatus.CONFLICT,
+        };
+      }
+
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
       request.requestBody({});
       
@@ -113,6 +124,13 @@ export class PagoService {
         status: HttpStatus.OK,
       };
     } catch (error) {
+      if (typeof error === 'object' && error !== null && 'details' in error && (error as any).details[0].issue === 'ORDER_ALREADY_CAPTURED') {
+        return {
+          message: 'La orden ya ha sido capturada previamente.',
+          status: HttpStatus.CONFLICT,
+        };
+      }
+
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
       throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
