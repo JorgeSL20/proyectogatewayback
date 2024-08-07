@@ -115,7 +115,7 @@ export class CarritoService {
       id: item.id,
       usuarioId: item.usuario.id,
       productoId: item.producto.id,
-      productoNombre: item.producto.producto, // Cambiar "producto" a "nombre"
+      productoNombre: item.producto.producto,
       productoImagen: item.producto.url,
       productoPrecio: item.producto.precio,
       cantidad: item.cantidad
