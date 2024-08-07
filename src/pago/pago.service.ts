@@ -89,19 +89,22 @@ export class PagoService {
       });
   
       await this.pagoRepository.save(pago);
-  
+
+      // Limpiar el carrito del usuario
       await this.carritoService.limpiarCarrito(userId);
 
       // Actualizar existencias de productos
       const items = response.result.purchase_units[0].items;
       for (const item of items) {
-        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Ajusta 'producto' según tu entidad
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Busca por 'producto' en lugar de 'nombre'
         if (producto) {
           producto.existencias -= parseInt(item.quantity, 10);
           if (producto.existencias < 0) {
-            throw new BadRequestException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
+            throw new BadRequestException(`No hay suficientes existencias para el producto con nombre ${producto.producto}`);
           }
           await this.productoRepository.save(producto);
+        } else {
+          throw new NotFoundException(`Producto con nombre ${item.name} no encontrado`);
         }
       }
   
@@ -110,13 +113,6 @@ export class PagoService {
         status: HttpStatus.OK,
       };
     } catch (error) {
-      if (typeof error === 'object' && error !== null && 'message' in error && (error as any).message.includes('ORDER_ALREADY_CAPTURED')) {
-        return {
-          message: 'La orden ya ha sido capturada previamente.',
-          status: HttpStatus.CONFLICT,
-        };
-      }
-
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
       throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
