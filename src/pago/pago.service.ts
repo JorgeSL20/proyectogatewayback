@@ -64,6 +64,17 @@ export class PagoService {
 
   async capturarPago(orderId: string, userId: number) {
     try {
+      // Consultar el estado de la orden
+      const orderRequest = new paypal.orders.OrdersGetRequest(orderId);
+      const orderResponse = await this.client.execute(orderRequest);
+      const orderStatus = orderResponse.result.status;
+
+      if (orderStatus === 'COMPLETED') {
+        // La orden ya ha sido capturada
+        throw new Error('La orden ya ha sido capturada.');
+      }
+
+      // Intentar capturar la orden
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
       request.requestBody({});
       
@@ -92,5 +103,5 @@ export class PagoService {
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
       throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
-  }  
+  }
 }
