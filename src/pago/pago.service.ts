@@ -1,5 +1,5 @@
 // pago.service.ts
-import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, ConflictException } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
 import { Repository } from 'typeorm';
@@ -70,8 +70,11 @@ export class PagoService {
       const orderStatus = orderResponse.result.status;
 
       if (orderStatus === 'COMPLETED') {
-        // La orden ya ha sido capturada
-        throw new Error('La orden ya ha sido capturada.');
+        // La orden ya ha sido capturada, retornar un mensaje adecuado sin lanzar una excepción
+        return {
+          message: 'La orden ya ha sido capturada previamente.',
+          status: HttpStatus.CONFLICT,
+        };
       }
 
       // Intentar capturar la orden
