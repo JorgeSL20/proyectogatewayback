@@ -123,28 +123,34 @@ export class CarritoService {
   }
 
   async limpiarCarrito(userId: number): Promise<void> {
-    // Obtener el usuario por su ID
-    const usuario = await this.authRepository.findOne({ where: { id: userId } });
+     // Obtener el usuario por su ID
+     const usuario = await this.authRepository.findOne({ where: { id: userId } });
 
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
-    }
-
-    // Buscar todos los productos del carrito del usuario
-    const carritos = await this.carritoRepository.find({ where: { usuario }, relations: ['producto'] });
-
-    if (carritos.length === 0) {
-      throw new NotFoundException(`Carrito vacío para el usuario con ID ${userId}`);
-    }
-
-    // Actualizar existencias de los productos
-    for (const item of carritos) {
-      const producto = item.producto;
-      producto.existencias += item.cantidad;
-      await this.productoRepository.save(producto);
-    }
-
-    // Eliminar todos los productos del carrito del usuario
-    await this.carritoRepository.delete({ usuario });
-  }
+     if (!usuario) {
+       throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+     }
+ 
+     // Buscar todos los productos del carrito del usuario
+     const carritos = await this.carritoRepository.find({ where: { usuario } });
+ 
+     if (carritos.length === 0) {
+       throw new NotFoundException(`Carrito vacío para el usuario con ID ${userId}`);
+     }
+ 
+     // Actualizar las existencias de los productos y eliminar los ítems del carrito
+     for (const item of carritos) {
+       const producto = await this.productoRepository.findOne({ where: { id: item.producto.id } });
+ 
+       if (!producto) {
+         throw new NotFoundException(`Producto con ID ${item.producto.id} no encontrado`);
+       }
+ 
+       // Incrementar las existencias del producto según la cantidad comprada
+       producto.existencias += item.cantidad;
+       await this.productoRepository.save(producto);
+     }
+ 
+     // Eliminar todos los productos del carrito del usuario
+     await this.carritoRepository.delete({ usuario });
+   }
 }
