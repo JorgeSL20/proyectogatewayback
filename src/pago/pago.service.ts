@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
 import { Repository } from 'typeorm';
@@ -69,7 +69,10 @@ export class PagoService {
       const response = await this.client.execute(request);
 
       if (response.result.status === 'COMPLETED') {
-        throw new ConflictException('La orden ya ha sido capturada previamente.');
+        return {
+          message: 'La orden ya ha sido capturada previamente.',
+          status: HttpStatus.CONFLICT,
+        };
       }
 
       const usuario = await this.authRepository.findOne({ where: { id: userId } });
@@ -92,8 +95,15 @@ export class PagoService {
         status: HttpStatus.OK,
       };
     } catch (error) {
+      if (typeof error === 'object' && error !== null && 'message' in error && (error as any).message.includes('ORDER_ALREADY_CAPTURED')) {
+        return {
+          message: 'La orden ya ha sido capturada previamente.',
+          status: HttpStatus.CONFLICT,
+        };
+      }
+
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
       throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
-  }
+  }  
 }
