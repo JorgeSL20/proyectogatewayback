@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put, NotFoundException } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -19,10 +19,10 @@ export class CarritoController {
     return this.carritoService.findAll();
   }
 
-  @Get('items/:usuarioId')
-  async obtenerItemsCarrito(@Param('usuarioId') usuarioId: string) {
-    const id = parseInt(usuarioId, 10);
-    return this.carritoService.findByUsuarioId(id);
+  @Get('items')
+  async obtenerItemsCarrito(@Req() req) {
+    const userId = req.user.id;
+    return this.carritoService.findByUsuarioId(userId);
   }
 
   @Delete('eliminar/:id')
@@ -31,17 +31,26 @@ export class CarritoController {
   }
 
   @Put('actualizar-cantidad/:id')
-  async actualizarCantidad(@Param('id') id: string, @Body('cantidad') cantidad: number) {
-    return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
+  async actualizarCantidad(@Param('id') id: string, @Body() body: { cantidad: number }) {
+    const cantidad = body.cantidad;
+    const resultado = await this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
+
+    if (!resultado) {
+      throw new NotFoundException('Item no encontrado en el carrito');
+    }
+
+    return resultado;
   }
 
-  @Delete('vaciar/:userId')
-  async vaciarCarrito(@Param('userId') userId: number): Promise<void> {
+  @Delete('vaciar')
+  async vaciarCarrito(@Req() req): Promise<void> {
+    const userId = req.user.id;
     await this.carritoService.limpiarCarrito(userId);
   }
 
-  @Post('procesar-pago/:userId')
-  async procesarPago(@Param('userId') userId: number): Promise<void> {
+  @Post('procesar-pago')
+  async procesarPago(@Req() req): Promise<void> {
+    const userId = req.user.id;
     await this.carritoService.procesarPago(userId);
   }
 }
