@@ -34,4 +34,9 @@ export class CarritoController {
   async actualizarCantidad(@Param('id') id: string, @Body('cantidad') cantidad: number) {
     return this.carritoService.actualizarCantidad(parseInt(id, 10), cantidad);
   }
+  @Delete('vaciar/:userId')
+  @UseGuards(AuthGuard) // O el guard que estés utilizando para proteger las rutas
+  async vaciarCarrito(@Param('userId') userId: number): Promise<void> {
+    await this.carritoService.limpiarCarrito(userId);
+  }
 }

@@ -1,3 +1,4 @@
+// src/pago/pago.service.ts
 import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, BadRequestException } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
@@ -65,16 +66,6 @@ export class PagoService {
 
   async capturarPago(orderId: string, userId: number) {
     try {
-      const orderRequest = new paypal.orders.OrdersGetRequest(orderId);
-      const orderResponse = await this.client.execute(orderRequest);
-      
-      if (orderResponse.result.status === 'COMPLETED') {
-        return {
-          message: 'La orden ya ha sido capturada previamente.',
-          status: HttpStatus.CONFLICT,
-        };
-      }
-
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
       request.requestBody({});
       
@@ -100,21 +91,19 @@ export class PagoService {
   
       await this.pagoRepository.save(pago);
 
-      // Limpiar el carrito del usuario
+      // Vaciar el carrito
       await this.carritoService.limpiarCarrito(userId);
 
       // Actualizar existencias de productos
       const items = response.result.purchase_units[0].items;
       for (const item of items) {
-        const producto = await this.productoRepository.findOne({ where: { producto: item.name } });
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Ajusta 'producto' según tu entidad
         if (producto) {
           producto.existencias -= parseInt(item.quantity, 10);
           if (producto.existencias < 0) {
-            throw new BadRequestException(`No hay suficientes existencias para el producto con nombre ${producto.producto}`);
+            throw new BadRequestException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
           }
           await this.productoRepository.save(producto);
-        } else {
-          throw new NotFoundException(`Producto con nombre ${item.name} no encontrado`);
         }
       }
   
@@ -123,7 +112,7 @@ export class PagoService {
         status: HttpStatus.OK,
       };
     } catch (error) {
-      if (typeof error === 'object' && error !== null && 'details' in error && (error as any).details[0].issue === 'ORDER_ALREADY_CAPTURED') {
+      if (typeof error === 'object' && error !== null && 'message' in error && (error as any).message.includes('ORDER_ALREADY_CAPTURED')) {
         return {
           message: 'La orden ya ha sido capturada previamente.',
           status: HttpStatus.CONFLICT,
