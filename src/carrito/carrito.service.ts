@@ -123,7 +123,15 @@ export class CarritoService {
   }
 
   async limpiarCarrito(usuarioId: number) {
-    const items = await this.carritoRepository.find({ where: { usuario: { id: usuarioId } } });
+    const items = await this.carritoRepository.find({ where: { usuario: { id: usuarioId } }, relations: ['producto'] });
+    
+    // Devolver existencias al inventario
+    for (const item of items) {
+      const producto = item.producto;
+      producto.existencias += item.cantidad;
+      await this.productoRepository.save(producto);
+    }
+
     await this.carritoRepository.remove(items);
   }
 }

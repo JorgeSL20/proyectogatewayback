@@ -1,10 +1,11 @@
-import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, BadRequestException } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pago } from './entities/pago.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
+import { Producto } from 'src/producto/entities/producto.entity';
 
 @Injectable()
 export class PagoService {
@@ -16,6 +17,7 @@ export class PagoService {
     private carritoService: CarritoService,
     @InjectRepository(Pago) private pagoRepository: Repository<Pago>,
     @InjectRepository(Auth) private authRepository: Repository<Auth>,
+    @InjectRepository(Producto) private productoRepository: Repository<Producto>,
   ) {
     const clientId = process.env.PAYPAL_CLIENT_ID_LIVE;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET_LIVE;
@@ -89,6 +91,19 @@ export class PagoService {
       await this.pagoRepository.save(pago);
   
       await this.carritoService.limpiarCarrito(userId);
+
+      // Actualizar existencias de productos
+      const items = response.result.purchase_units[0].items;
+      for (const item of items) {
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Ajusta 'producto' según tu entidad
+        if (producto) {
+          producto.existencias -= parseInt(item.quantity, 10);
+          if (producto.existencias < 0) {
+            throw new BadRequestException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
+          }
+          await this.productoRepository.save(producto);
+        }
+      }
   
       return {
         message: 'Pago capturado y guardado exitosamente',
@@ -105,5 +120,5 @@ export class PagoService {
       console.error('Error al capturar el pago de PayPal:', (error as Error).message);
       throw new Error(`Error al capturar el pago de PayPal: ${(error as Error).message}`);
     }
-  }  
+  }
 }
