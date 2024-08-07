@@ -115,7 +115,7 @@ export class CarritoService {
       id: item.id,
       usuarioId: item.usuario.id,
       productoId: item.producto.id,
-      productoNombre: item.producto.producto,
+      productoNombre: item.producto.producto, // Cambiar "producto" a "nombre"
       productoImagen: item.producto.url,
       productoPrecio: item.producto.precio,
       cantidad: item.cantidad
@@ -127,7 +127,7 @@ export class CarritoService {
       throw new BadRequestException('ID de usuario inválido');
     }
 
-    const items = await this.carritoRepository.find({ where: { usuario: { id: userId } } });
+    const items = await this.carritoRepository.find({ where: { usuario: { id: userId } }, relations: ['producto'] });
 
     if (items.length === 0) {
       throw new NotFoundException('Carrito vacío o no encontrado');
