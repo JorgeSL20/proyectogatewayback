@@ -65,7 +65,6 @@ export class PagoService {
 
   async capturarPago(orderId: string, userId: number) {
     try {
-      // Verificar el estado de la orden
       const orderRequest = new paypal.orders.OrdersGetRequest(orderId);
       const orderResponse = await this.client.execute(orderRequest);
       
@@ -107,7 +106,7 @@ export class PagoService {
       // Actualizar existencias de productos
       const items = response.result.purchase_units[0].items;
       for (const item of items) {
-        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Busca por 'producto' en lugar de 'nombre'
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } });
         if (producto) {
           producto.existencias -= parseInt(item.quantity, 10);
           if (producto.existencias < 0) {

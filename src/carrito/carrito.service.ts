@@ -15,6 +15,7 @@ export class CarritoService {
     private authRepository: Repository<Auth>,
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
+    
   ) {}
 
   async createOrUpdate(crearCarritoDto: CrearCarritoDto, userId: number) {
@@ -122,16 +123,22 @@ export class CarritoService {
     }));
   }
 
-  async limpiarCarrito(usuarioId: number) {
-    const items = await this.carritoRepository.find({ where: { usuario: { id: usuarioId } }, relations: ['producto'] });
-    
-    // Devolver existencias al inventario
-    for (const item of items) {
-      const producto = item.producto;
-      producto.existencias += item.cantidad;
-      await this.productoRepository.save(producto);
+  async limpiarCarrito(userId: number): Promise<void> {
+    // Obtener el usuario por su ID
+    const usuario = await this.authRepository.findOne({ where: { id: userId } });
+
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
     }
 
-    await this.carritoRepository.remove(items);
+    // Buscar todos los productos del carrito del usuario
+    const carritos = await this.carritoRepository.find({ where: { usuario } });
+
+    if (carritos.length === 0) {
+      throw new NotFoundException(`Carrito vacío para el usuario con ID ${userId}`);
+    }
+
+    // Eliminar todos los productos del carrito del usuario
+    await this.carritoRepository.delete({ usuario });
   }
 }
