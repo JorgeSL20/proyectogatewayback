@@ -39,4 +39,9 @@ export class CarritoController {
   async vaciarCarrito(@Param('userId') userId: number): Promise<void> {
     await this.carritoService.limpiarCarrito(userId);
   }
+
+  @Post('procesar-pago/:userId')
+  async procesarPago(@Param('userId') userId: number): Promise<void> {
+    await this.carritoService.procesarPago(userId);
+  }
 }
