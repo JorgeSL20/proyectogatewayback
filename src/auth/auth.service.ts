@@ -343,11 +343,11 @@ async validateToken(token: string): Promise<Auth | null> {
   }
 
   async updateRoleByEmail(email: string, newRole: string) {
-  const user = await this.authRepository.findOne({ where: { email } });
-  if (!user) {
-    throw new NotFoundException('Usuario no encontrado');
+    const user = await this.authRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    user.role = newRole;
+    return this.authRepository.save(user);
   }
-  user.role = newRole;
-  return this.authRepository.save(user);
-}
 }

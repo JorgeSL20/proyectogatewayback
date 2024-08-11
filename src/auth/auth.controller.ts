@@ -90,5 +90,4 @@ deleteUser(@Param('email') email: string) { // Captura el parámetro email de la
 updateRoleByEmail(@Param('email') email: string, @Body() updateRoleDto: { role: string }) {
   return this.authService.updateRoleByEmail(email, updateRoleDto.role);
 }
-
 }
