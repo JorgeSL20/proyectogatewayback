@@ -86,9 +86,9 @@ deleteUser(@Param('email') email: string) { // Captura el parámetro email de la
   return this.authService.deleteUser(email); // Llama al método correspondiente en el servicio y pasa el email
 }
 
-@Patch('rol/:id')
-updateRole(@Param('id') id: string, @Body() updateRoleDto: { role: string }) {
-  return this.authService.updateRole(parseInt(id), updateRoleDto.role);
+@Patch('role/:email')
+updateRoleByEmail(@Param('email') email: string, @Body() updateRoleDto: { role: string }) {
+  return this.authService.updateRoleByEmail(email, updateRoleDto.role);
 }
 
 }
