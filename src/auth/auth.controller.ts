@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -83,6 +84,11 @@ getAuth() {
 @Delete('user/:email') // Define la ruta para el método deleteUser, con el parámetro email en la URL
 deleteUser(@Param('email') email: string) { // Captura el parámetro email de la URL
   return this.authService.deleteUser(email); // Llama al método correspondiente en el servicio y pasa el email
+}
+
+@Patch('rol/:id')
+updateRole(@Param('id') id: string, @Body() updateRoleDto: { role: string }) {
+  return this.authService.updateRole(parseInt(id), updateRoleDto.role);
 }
 
 }

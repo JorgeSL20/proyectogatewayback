@@ -293,13 +293,17 @@ export class AuthService {
     }
 }
 
-  async validateToken(token: string): Promise<Auth | null> {
-    const userId = parseInt(token, 10);
-    if (isNaN(userId)) {
-      return null;
-    }
-    return this.authRepository.findOne({ where: { id: userId } });
+async validateToken(token: string): Promise<Auth | null> {
+  const userId = parseInt(token, 10);
+  if (isNaN(userId)) {
+    return null;
   }
+  const user = await this.authRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    return null;
+  }
+  return user;
+}
 
   async asignarIntentos(id: number, intento: number) {
     const user = await this.authRepository.findOne({ where: { id } });
@@ -335,5 +339,30 @@ export class AuthService {
 
   async findOne(id: string) {
     return this.authRepository.findOne({ where: { id: parseInt(id) } });
+  }
+  async updateRole(id: number, newRole: string) {
+    try {
+      const foundUser = await this.authRepository.findOne({ where: { id } });
+      if (!foundUser) {
+        return {
+          message: 'Usuario no encontrado',
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      foundUser.role = newRole; // Asigna el nuevo rol
+      await this.authRepository.save(foundUser);
+
+      return {
+        message: 'Rol del usuario actualizado correctamente',
+        status: HttpStatus.OK,
+      };
+    } catch (error) {
+      console.error('Error en updateRole:', error);
+      return {
+        message: 'Error en el servidor',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
   }
 }

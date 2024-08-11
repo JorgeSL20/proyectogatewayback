@@ -1,10 +1,9 @@
 // pago.controller.ts
 import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { PagoService } from './pago.service';
-import { AuthGuard } from 'src/auth/auth.guard';
+
 
 @Controller('pago')
-@UseGuards(AuthGuard)
 export class PagoController {
   constructor(private readonly pagoService: PagoService) {}
 
