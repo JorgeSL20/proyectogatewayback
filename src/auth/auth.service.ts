@@ -8,6 +8,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -340,13 +341,13 @@ async validateToken(token: string): Promise<Auth | null> {
   async findOne(id: string) {
     return this.authRepository.findOne({ where: { id: parseInt(id) } });
   }
-  
+
   async updateRoleByEmail(email: string, newRole: string) {
-    const user = await this.authRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new Error('Usuario no encontrado');
-    }
-    user.role = newRole;
-    return this.authRepository.save(user);
+  const user = await this.authRepository.findOne({ where: { email } });
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
   }
+  user.role = newRole;
+  return this.authRepository.save(user);
+}
 }
