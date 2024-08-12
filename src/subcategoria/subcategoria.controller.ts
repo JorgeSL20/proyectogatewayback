@@ -1,33 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, HttpException, HttpStatus,BadRequestException } from '@nestjs/common';
 import { SubcategoriaService } from './subcategoria.service';
 import { CreateSubcategoriaDto } from './dto/create-subcategoria.dto';
 import { UpdateSubcategoriaDto } from './dto/update-subcategoria.dto';
 
 @Controller('subcategoria') // Usa 'subcategoria' en minúsculas si es necesario
 export class SubcategoriaController {
-  constructor(private readonly SubcategoriaService: SubcategoriaService) {}
+  constructor(private readonly subcategoriaService: SubcategoriaService) {}
 
   @Post()
-  create(@Body() createSubcategoriaDto: CreateSubcategoriaDto) {
-    return this.SubcategoriaService.create(createSubcategoriaDto);
+  async create(@Body() createSubcategoriaDto: CreateSubcategoriaDto) {
+    try {
+      return await this.subcategoriaService.create(createSubcategoriaDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException('Error al crear subcategoría', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get()
   findAll() {
-    return this.SubcategoriaService.findAll();
+    return this.subcategoriaService.findAll();
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateSubcategoriaDto: UpdateSubcategoriaDto) {
     const parsedId = parseInt(id, 10);
-    return this.SubcategoriaService.updateById(parsedId, updateSubcategoriaDto);
+    return this.subcategoriaService.updateById(parsedId, updateSubcategoriaDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     const parsedId = parseInt(id, 10);
-    return this.SubcategoriaService.remove(parsedId);
+    return this.subcategoriaService.remove(parsedId);
   }
 }
-
-
