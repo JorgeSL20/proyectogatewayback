@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, HttpException, HttpStatus,BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
 import { SubcategoriaService } from './subcategoria.service';
 import { CreateSubcategoriaDto } from './dto/create-subcategoria.dto';
 import { UpdateSubcategoriaDto } from './dto/update-subcategoria.dto';
 
-@Controller('subcategoria') // Usa 'subcategoria' en minúsculas si es necesario
+@Controller('subcategoria')
 export class SubcategoriaController {
   constructor(private readonly subcategoriaService: SubcategoriaService) {}
 
@@ -22,6 +22,16 @@ export class SubcategoriaController {
   @Get()
   findAll() {
     return this.subcategoriaService.findAll();
+  }
+
+  @Get('verificar/:subcategoria')
+  async verificar(@Param('subcategoria') subcategoria: string) {
+    try {
+      const exists = await this.subcategoriaService.verificarSubcategoriaUnica(subcategoria);
+      return { unique: !exists };
+    } catch (error) {
+      throw new HttpException('Error al verificar subcategoría', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Put(':id')

@@ -1,5 +1,4 @@
-// services/subcategoria.service.ts
-import { Injectable, BadRequestException,HttpStatus } from '@nestjs/common';
+import { Injectable, BadRequestException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subcategoria } from './entities/subcategoria.entity';
@@ -40,5 +39,10 @@ export class SubcategoriaService {
 
   async findAll() {
     return this.subcategoriaRepository.find();
+  }
+
+  async verificarSubcategoriaUnica(subcategoria: string): Promise<boolean> {
+    const existingSubcategoria = await this.subcategoriaRepository.findOne({ where: { subcategoria } });
+    return !!existingSubcategoria;
   }
 }
