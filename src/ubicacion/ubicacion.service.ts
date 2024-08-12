@@ -29,12 +29,10 @@ export class UbicacionService {
     return ubicacion;
   }
 
-  async update(id: number, updateUbicacionDto: UpdateUbicacionDto) {
-    const result = await this.ubicacionRepository.update(id, updateUbicacionDto);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Ubicación con id ${id} no encontrada`);
-    }
-    return this.ubicacionRepository.findOne({ where: { id } });
+  async update(id: number, updateData: Partial<Ubicacion>): Promise<Ubicacion> {
+    await this.ubicacionRepository.update(id, updateData);
+    const ubicaciones = await this.ubicacionRepository.find({ where: { id } });
+    return ubicaciones[0];  // Devuelve el primer (y único) resultado
   }
 
   async remove(id: number) {
