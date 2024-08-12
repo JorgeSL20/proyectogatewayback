@@ -60,7 +60,6 @@ export class CarritoService {
       return this.carritoRepository.save(newCarrito);
     }
   }
-
   async remove(id: number) {
     const carritoItem = await this.carritoRepository.findOne({ where: { id }, relations: ['producto'] });
     if (!carritoItem) {
@@ -88,7 +87,7 @@ export class CarritoService {
 
     producto.existencias += carritoItem.cantidad - nuevaCantidad;
     if (producto.existencias < 0) {
-      throw new BadRequestException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
+      throw new NotFoundException(`No hay suficientes existencias para el producto con ID ${producto.id}`);
     }
     await this.productoRepository.save(producto);
 
