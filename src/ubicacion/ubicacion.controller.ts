@@ -13,7 +13,7 @@ export class UbicacionController {
     @Param('id') id: number,
     @Body() updateData: Partial<Ubicacion>,
   ): Promise<Ubicacion> {
-    return this.ubicacionService.update(id, updateData);
+    return this.ubicacionService.actualizar(id, updateData);
   }
   
   @Post()
@@ -32,9 +32,10 @@ export class UbicacionController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUbicacionDto: UpdateUbicacionDto) {
-    return this.ubicacionService.update(+id, updateUbicacionDto);
-  }
+async actualizarUbicacion(@Param('id') id: number, @Body() ubicacion: Ubicacion): Promise<Ubicacion> {
+  return this.ubicacionService.actualizar(id, ubicacion);
+}
+
 
   @Delete(':id')
   async remove(@Param('id') id: string) {

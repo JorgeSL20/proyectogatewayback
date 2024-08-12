@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,InternalServerErrorException } from '@nestjs/common';
 import { CreateUbicacionDto } from './dto/create-ubicacion.dto';
 import { UpdateUbicacionDto } from './dto/update-ubicacion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,11 +29,12 @@ export class UbicacionService {
     return ubicacion;
   }
 
-  async update(id: number, updateData: Partial<Ubicacion>): Promise<Ubicacion> {
+  async actualizar(id: number, updateData: Partial<Ubicacion>): Promise<Ubicacion> {
     await this.ubicacionRepository.update(id, updateData);
-    const ubicaciones = await this.ubicacionRepository.find({ where: { id } });
-    return ubicaciones[0];  // Devuelve el primer (y único) resultado
+    return this.ubicacionRepository.findOneBy({ id });
   }
+  
+  
 
   async remove(id: number) {
     const result = await this.ubicacionRepository.delete(id);
