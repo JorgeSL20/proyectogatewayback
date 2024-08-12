@@ -35,7 +35,7 @@ export class Auth {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     lastAttempt: Date;
 
-    @Column({ default: 'admin' }) // Valor por defecto 'user'
+    @Column({ default: 'user' }) // Valor por defecto 'user'
     role: string;
     
     @OneToMany(() => Logs, logs => logs.usuario)
