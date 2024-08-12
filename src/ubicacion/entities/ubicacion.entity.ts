@@ -1,7 +1,6 @@
-// src/ubicacion/entities/ubicacion.entity.ts
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'ubicacion' })
+@Entity()
 export class Ubicacion {
   @PrimaryGeneratedColumn()
   id: number;
@@ -10,6 +9,5 @@ export class Ubicacion {
   name: string;
 
   @Column()
-  link: string;
-
+  url: string;  // Asegúrate de que esta línea esté presente
 }
