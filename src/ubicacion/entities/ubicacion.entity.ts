@@ -9,12 +9,7 @@ export class Ubicacion {
   @Column()
   name: string;
 
-  @Column('decimal', { precision: 10, scale: 7 })
-  latitude: number;
-
-  @Column('decimal', { precision: 10, scale: 7 })
-  longitude: number;
-
   @Column()
-  zoom: number;
+  link: string;
+
 }

@@ -1,9 +1,12 @@
-// src/ubicacion/dto/create-ubicacion.dto.ts
+import { IsString, IsNotEmpty, IsUrl } from 'class-validator';
+
 export class CreateUbicacionDto {
-    id: number;
-    name: string;
-    latitude: number;
-    longitude: number;
-    zoom: number;
-  }
-  
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUrl()
+  link: string;
+}

@@ -1,6 +1,6 @@
-// src/ubicacion/ubicacion.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUbicacionDto } from './dto/create-ubicacion.dto';
+import { UpdateUbicacionDto } from './dto/update-ubicacion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ubicacion } from './entities/ubicacion.entity';
@@ -22,16 +22,26 @@ export class UbicacionService {
   }
 
   async findOne(id: number) {
-    return this.ubicacionRepository.findOne({ where: { id } });
+    const ubicacion = await this.ubicacionRepository.findOne({ where: { id } });
+    if (!ubicacion) {
+      throw new NotFoundException(`Ubicación con id ${id} no encontrada`);
+    }
+    return ubicacion;
   }
 
-  async update(id: number, updateUbicacionDto: Partial<CreateUbicacionDto>) {
-    await this.ubicacionRepository.update(id, updateUbicacionDto);
+  async update(id: number, updateUbicacionDto: UpdateUbicacionDto) {
+    const result = await this.ubicacionRepository.update(id, updateUbicacionDto);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Ubicación con id ${id} no encontrada`);
+    }
     return this.ubicacionRepository.findOne({ where: { id } });
   }
 
   async remove(id: number) {
-    await this.ubicacionRepository.delete(id);
+    const result = await this.ubicacionRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Ubicación con id ${id} no encontrada`);
+    }
     return { deleted: true };
   }
 }
