@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards, Put } from '@nestjs/common';
 import { CarritoService } from './carrito.service';
 import { CrearCarritoDto } from './dto/create-carrito.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('carrito')
+@UseGuards(AuthGuard)
 export class CarritoController {
   constructor(private readonly carritoService: CarritoService) {}
 
