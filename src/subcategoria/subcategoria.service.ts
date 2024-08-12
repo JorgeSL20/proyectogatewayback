@@ -13,6 +13,20 @@ export class SubcategoriaService {
   ) {}
 
   async create(createSubcategoriaDto: CreateSubcategoriaDto) {
+    const { categoria, subcategoria } = createSubcategoriaDto;
+
+    // Verificar si la subcategoría ya existe en la misma categoría
+    const existingSubcategoria = await this.SubcategoriaRepository.findOne({
+      where: {
+        categoria: categoria.trim().toLowerCase(),
+        subcategoria: subcategoria.trim().toLowerCase(),
+      },
+    });
+
+    if (existingSubcategoria) {
+      throw new Error('Esta subcategoría ya existe en la categoría seleccionada');
+    }
+
     const newSubcategoria = this.SubcategoriaRepository.create(createSubcategoriaDto);
     return this.SubcategoriaRepository.save(newSubcategoria);
   }
