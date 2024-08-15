@@ -33,8 +33,12 @@ export class ProductoService {
     return this.productoRepository.save(newProducto);
   }
 
-  async findAll(): Promise<Producto[]> {
-    return this.productoRepository.find();
+  async findAll(orderBy: string = 'id', order: 'ASC' | 'DESC' = 'ASC'): Promise<Producto[]> {
+    return this.productoRepository.find({
+      order: {
+        [orderBy]: order,
+      },
+    });
   }
 
   async findOne(id: number): Promise<Producto> {
