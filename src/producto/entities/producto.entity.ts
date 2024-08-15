@@ -1,5 +1,5 @@
 // src/producto/entities/producto.entity.ts
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany, CreateDateColumn } from "typeorm";
 import { Carrito } from '../../carrito/entities/carrito.entity';
 
 @Entity({ name: 'producto' })
@@ -27,6 +27,9 @@ export class Producto {
 
     @Column()
     existencias: number;  // Renombrado a 'existencias'
+
+    @CreateDateColumn({ type: 'timestamp' })
+    fechaCreacion: Date;  // Nueva propiedad para la fecha de creación
 
     @OneToMany(() => Carrito, carrito => carrito.producto)
     carritos: Carrito[];
