@@ -97,7 +97,7 @@ export class PagoService {
       // Actualizar existencias de productos
       const items = response.result.purchase_units[0].items;
       for (const item of items) {
-        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Ajusta 'producto' según tu entidad
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } });
         if (producto) {
           producto.existencias -= parseInt(item.quantity, 10);
           if (producto.existencias < 0) {
