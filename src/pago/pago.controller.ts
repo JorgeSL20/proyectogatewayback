@@ -15,9 +15,9 @@ export class PagoController {
   }
 
   @Post('capturar-pago')
-  async capturarPago(@Body('orderId') orderId: string, @Req() req) {
-    console.log(`Order ID: ${orderId}`);
-    
+  async capturarPago(@Body() body: { orderId: string }, @Req() req) {
+    const { orderId } = body;
+
     if (!orderId) {
       throw new BadRequestException('Order ID is required');
     }

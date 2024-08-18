@@ -1,4 +1,3 @@
-// src/pago/pago.service.ts
 import { Injectable, Inject, forwardRef, NotFoundException, HttpStatus, BadRequestException } from '@nestjs/common';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { CarritoService } from 'src/carrito/carrito.service';
@@ -97,7 +96,7 @@ export class PagoService {
       // Actualizar existencias de productos
       const items = response.result.purchase_units[0].items;
       for (const item of items) {
-        const producto = await this.productoRepository.findOne({ where: { producto: item.name } });
+        const producto = await this.productoRepository.findOne({ where: { producto: item.name } }); // Ajusta 'nombre' según tu entidad
         if (producto) {
           producto.existencias -= parseInt(item.quantity, 10);
           if (producto.existencias < 0) {
