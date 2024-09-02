@@ -116,7 +116,8 @@ export class CarritoService {
       productoId: item.producto.id,
       productoNombre: item.producto.producto,
       productoImagen: item.producto.url,
-      productoPrecio: item.producto.precio,
+      productoPrecio: item.producto.precioMen,
+      productoPrecioMay: item.producto.precioMay,
       cantidad: item.cantidad
     }));
   }

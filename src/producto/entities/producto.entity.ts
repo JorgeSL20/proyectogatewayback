@@ -23,7 +23,13 @@ export class Producto {
     descripcion: string;
 
     @Column()
-    precio: number;
+    cantidadMay: number;
+
+    @Column()
+    precioMen: number;
+
+    @Column()
+    precioMay: number;
 
     @Column()
     existencias: number;  // Renombrado a 'existencias'
