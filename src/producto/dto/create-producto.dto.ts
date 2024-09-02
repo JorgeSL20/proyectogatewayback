@@ -6,7 +6,9 @@ export class CreateProductoDto {
     categoria: string;
     marca: string;
     descripcion: string;
-    precio: number;
+    cantidadMay: number;
+    precioMen: number;
+    precioMay: number;
     existencias: number;
     fechaCreacion?: Date;  // Propiedad opcional para la fecha de creación
 }
