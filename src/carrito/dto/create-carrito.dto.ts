@@ -20,7 +20,11 @@ export class CrearCarritoDto {
 
   @IsNumber()
   @IsNotEmpty()
-  productoPrecio: number;
+  productoPrecioMen: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  productoPrecioMay: number;
 
   @IsNumber()
   @IsNotEmpty()
