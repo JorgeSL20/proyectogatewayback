@@ -28,5 +28,9 @@ export class CrearCarritoDto {
 
   @IsNumber()
   @IsNotEmpty()
+  productoCantidadMay: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   cantidad: number;
 }
