@@ -7,7 +7,7 @@ async function bootstrap() {
 
   
   const CorsOptions: CorsOptions = {
-    origin:[ 'https://proyectogatewayback-production.up.railway.app','https://gateway-soluciones.netlify.app', 'http://localhost:4200', 'http://localhost:8100', 'http://192.168.1.69:8100'],
+    origin:[ 'https://proyectogatewayback-production.up.railway.app','https://gateway-soluciones.netlify.app', 'http://localhost:4200', 'http://localhost:8080'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: false,
   }
