@@ -26,6 +26,43 @@ export class PagoService {
     this.client = new paypal.core.PayPalHttpClient(this.environment);
   }
 
+  async crearOrden(pagoData: any) {
+    const { total, items } = pagoData;
+
+    try {
+      const request = new paypal.orders.OrdersCreateRequest();
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: 'MXN',
+            value: total.toFixed(2),
+            breakdown: {
+              item_total: {
+                currency_code: 'MXN',
+                value: total.toFixed(2),
+              },
+            },
+          },
+          items: items.map(item => ({
+            name: item.productoNombre,
+            unit_amount: {
+              currency_code: 'MXN',
+              value: item.productoPrecio.toFixed(2),
+            },
+            quantity: item.cantidad.toString(),
+          })),
+        }],
+      });
+
+      const response = await this.client.execute(request);
+      return response.result;
+    } catch (error) {
+      console.error('Error al crear la orden de PayPal:', (error as Error).message);
+      throw new Error('Error al crear la orden de PayPal');
+    }
+  }
+
   async capturarPago(orderId: string, userId: number) {
     try {
       const request = new paypal.orders.OrdersCaptureRequest(orderId);
