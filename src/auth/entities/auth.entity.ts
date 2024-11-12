@@ -29,6 +29,9 @@ export class Auth {
     @Column()
     respuesta: string;
 
+    @Column()
+    url: string;
+
     @Column({ nullable: true })
     intentos?: number | null;
 

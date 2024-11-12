@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+/*import { Module, forwardRef } from '@nestjs/common';
 import { PagoService } from './pago.service';
 import { PagoController } from './pago.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,3 +18,4 @@ import { Producto } from 'src/producto/entities/producto.entity'; // Importa la 
   exports: [PagoService],
 })
 export class PagoModule {}
+*/

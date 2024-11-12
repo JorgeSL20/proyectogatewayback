@@ -9,6 +9,8 @@ import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
 import { NotFoundException } from '@nestjs/common';
+import { url } from 'inspector';
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +32,20 @@ export class AuthService {
       ...resultado,
     });
     return this.authRepository.save(newUser);
+  }
+
+  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'auth_images', // Personaliza el nombre de la carpeta si es necesario
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      ).end(file.buffer);
+    });
   }
 
   async login(user: Auth): Promise<{ token: number }> {
@@ -157,6 +173,11 @@ export class AuthService {
         id: parseInt(id),
       },
     });
+
+    if (!userFound) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     return {
       name: userFound.name,
       lastNameP: userFound.lastNameP,
@@ -164,6 +185,7 @@ export class AuthService {
       email: userFound.email,
       pregunta: userFound.pregunta,
       respuesta: userFound.respuesta,
+      url: userFound.url, // Incluimos la URL de la imagen
     };
   }
 

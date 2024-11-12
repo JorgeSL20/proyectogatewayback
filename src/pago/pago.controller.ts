@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, BadRequestException } from '@nestjs/common';
+/*import { Controller, Post, Body, Req, UseGuards, BadRequestException } from '@nestjs/common';
 import { PagoService } from './pago.service';
 
 @Controller('pago')
@@ -15,11 +15,11 @@ export class PagoController {
   }
 
   @Post('capturar-pago')
-  async capturarPago(@Body() body: { orderId: string }, @Req() req) {
-    const { orderId } = body;
+  async capturarPago(@Body() body: { paymentId: string }, @Req() req) {
+    const { paymentId } = body;
 
-    if (!orderId) {
-      throw new BadRequestException('Order ID is required');
+    if (!paymentId) {
+      throw new BadRequestException('Payment ID is required');
     }
 
     const userId = req.user?.id;
@@ -27,6 +27,6 @@ export class PagoController {
       throw new BadRequestException('User ID is undefined');
     }
 
-    return this.pagoService.capturarPago(orderId, userId);
+    return this.pagoService.capturarPago(paymentId, userId);
   }
-}
+}*/
