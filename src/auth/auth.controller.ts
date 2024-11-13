@@ -1,27 +1,17 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto, CreateInformacionDto, CreatePreguntasDto } from './dto/create-auth.dto';
+import { UpdateAuthDto } from './dto/update-auth.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Crear un nuevo usuario con imagen
+  // Usuarios
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile() file: Express.Multer.File, @Body() createAuthDto: CreateAuthDto) {
-    if (!file) throw new BadRequestException('No file uploaded');
-    const result = await this.authService.uploadImage(file);
-    createAuthDto.url = result.secure_url;
+  create(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.create(createAuthDto);
-  }
-
-  @Post('upload-image/:id')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @Param('id') id: string) {
-    const result = await this.authService.uploadImage(file);
-    return { secure_url: result.secure_url };
   }
 
   @Get()
@@ -35,27 +25,17 @@ export class AuthController {
   }
 
   @Patch(':email')
-  @UseInterceptors(FileInterceptor('file'))
-  async update(@Param('email') email: string, @Body() updateAuthDto: CreateAuthDto, @UploadedFile() file: Express.Multer.File) {
-    if (file) {
-      const result = await this.authService.uploadImage(file);
-      updateAuthDto.url = result.secure_url;
-    }
+  update(@Param('email') email: string, @Body() updateAuthDto: CreateAuthDto) {
     return this.authService.update(email, updateAuthDto);
   }
 
   @Patch('password/:email')
-  updatePassword(@Param('email') email: string, @Body() { password, ip, fecha }: { password: string; ip: string; fecha: string }) {
-    return this.authService.updatePassword(email, { password, ip, fecha });
+  updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password: string, ip: string, fecha: string}) {
+    return this.authService.updatePassword(email, updateAuthDto);
   }
 
   @Patch('perfil/:id')
-  @UseInterceptors(FileInterceptor('file'))
-  async updateById(@Param('id') id: string, @Body() updateAuthDto: CreateAuthDto, @UploadedFile() file: Express.Multer.File) {
-    if (file) {
-      const result = await this.authService.uploadImage(file);
-      updateAuthDto.url = result.secure_url;
-    }
+  updateById(@Param('id') id: string, @Body() updateAuthDto: CreateAuthDto) {
     return this.authService.updateById(parseInt(id), updateAuthDto);
   }
 
@@ -69,7 +49,7 @@ export class AuthController {
     return this.authService.getUserById(id);
   }
 
-  // Información adicional
+  // Informacion
   @Get('informacion/:id')
   getInformacionById(@Param('id') id: string) {
     return this.authService.getInformacionById(id);
@@ -80,9 +60,9 @@ export class AuthController {
     return this.authService.updateInformacionById(id, updateInformacionDto);
   }
 
-  // Preguntas de seguridad
-  @Get('preguntas')
-  getPreguntas() {
+  // Pregunta
+  @Get('preguntas/:data')
+  getPreguntas(@Param('data') data: string) {
     return this.authService.getPreguntas();
   }
 
@@ -101,13 +81,29 @@ export class AuthController {
     return this.authService.deletePregunta(parseInt(id));
   }
 
+  @Get('auth')
+  getAuth() {
+    return this.authService.getAuth();
+  }
+
   @Delete('user/:email')
   deleteUser(@Param('email') email: string) {
     return this.authService.deleteUser(email);
   }
 
   @Patch('role/:email')
-  updateRoleByEmail(@Param('email') email: string, @Body() { role }: { role: string }) {
-    return this.authService.updateRoleByEmail(email, role);
+  updateRoleByEmail(@Param('email') email: string, @Body() updateRoleDto: { role: string }) {
+    return this.authService.updateRoleByEmail(email, updateRoleDto.role);
+  }
+
+  // Endpoint para subir imagenes de perfil
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    const result = await this.authService.uploadImage(file);
+    return { secure_url: result.secure_url };
   }
 }

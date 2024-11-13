@@ -9,8 +9,13 @@ import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
 import { NotFoundException } from '@nestjs/common';
-import { url } from 'inspector';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: 'dkwb9vcbb',
+  api_key: '724994365615579',
+  api_secret: 'KXXzGbwWPb6-j5Cpfpxx6P1SvDA',
+});
 
 @Injectable()
 export class AuthService {
@@ -25,39 +30,14 @@ export class AuthService {
     private logsRepository: Repository<Logs>,
   ) {}
 
-   // Método para crear un nuevo usuario, con imagen opcional
-   async create(createAuthDto: CreateAuthDto, file?: Express.Multer.File) {
+  
+  create(createAuthDto: CreateAuthDto) {
     const { password, ...resultado } = createAuthDto;
-    
-    // Si hay un archivo de imagen, lo subimos a Cloudinary
-    let imageUrl = null;
-    if (file) {
-      const uploadResult = await this.uploadImage(file);
-      imageUrl = uploadResult.secure_url; // URL segura de la imagen subida
-    }
-
     const newUser = this.authRepository.create({
       password: bcryptjs.hashSync(password, 10),
       ...resultado,
-      url: imageUrl, // Guardamos la URL de la imagen si existe
     });
     return this.authRepository.save(newUser);
-  }
-
-   // Método para cargar la imagen en Cloudinary
-   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
-    return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: 'user_images', // Nombre de la carpeta donde se guardarán las imágenes
-          resource_type: 'auto', // Puede manejar varios tipos de archivos como imágenes y videos
-        },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      ).end(file.buffer); // Inicia la carga con el buffer de la imagen
-    });
   }
 
   async login(user: Auth): Promise<{ token: number }> {
@@ -67,59 +47,46 @@ export class AuthService {
   }
 
   async updateById(id: number, updateAuthDto: CreateAuthDto, file?: Express.Multer.File) {
-    try {
-      const foundUser = await this.authRepository.findOne({ where: { id } });
-      if (!foundUser) {
-        return {
-          message: 'Usuario no encontrado',
-          status: HttpStatus.NOT_FOUND,
-        };
-      }
-  
-      let imageUrl: string | undefined;
-      // Si se ha proporcionado una imagen, se sube a Cloudinary
-      if (file) {
-        const uploadResult = await this.uploadImage(file);
-        imageUrl = uploadResult.secure_url; // URL de la imagen subida
-      }
-  
-      const { ip, fecha_log, ...data } = updateAuthDto;
-      // Si hay una nueva imagen, se agrega a los datos de actualización
-      if (imageUrl) {
-        data.url = imageUrl;
-      }
-  
-      await this.authRepository.update(id, data);
-  
-      console.log('Datos actualizados para el usuario:', data);
-  
-      // Registrar la actualización
-      try {
-        await this.crearLogs({
-          accion: 'Se actualizó la información del usuario',
-          fecha: fecha_log,
-          ip,
-          status: HttpStatus.OK,
-          url: `auth/perfil/${id}`,
-        }, foundUser.email);
-      } catch (logError) {
-        console.error('Error al crear el log:', logError);
-      }
-  
+    const foundUser = await this.authRepository.findOne({ where: { id } });
+    if (!foundUser) {
       return {
-        message: 'Usuario actualizado correctamente',
-        status: HttpStatus.OK,
-      };
-    } catch (error) {
-      console.error('Error en updateById:', error);
-      console.error('Full error stack:', error);
-      return {
-        message: 'Error en el servidor',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Usuario no encontrado',
+        status: HttpStatus.NOT_FOUND,
       };
     }
+
+    const { ip, fecha_log, ...data } = updateAuthDto;
+
+    // Si hay un archivo, sube la imagen a Cloudinary
+    if (file) {
+      if (foundUser.url) {
+        const publicId = this.extractPublicId(foundUser.url);
+        await cloudinary.uploader.destroy(publicId);
+      }
+      const result = await this.uploadImage(file);
+      data.url = result.secure_url;
+    }
+
+    await this.authRepository.update(id, data);
+    console.log('Datos actualizados para el usuario:', data);
+
+    try {
+      await this.crearLogs({
+        accion: 'Se actualizó la información del usuario',
+        fecha: fecha_log,
+        ip,
+        status: HttpStatus.OK,
+        url: `auth/perfil/${id}`,
+      }, foundUser.email);
+    } catch (logError) {
+      console.error('Error al crear el log:', logError);
+    }
+
+    return {
+      message: 'Usuario actualizado correctamente',
+      status: HttpStatus.OK,
+    };
   }
-  
 
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
@@ -199,11 +166,6 @@ export class AuthService {
         id: parseInt(id),
       },
     });
-
-    if (!userFound) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
     return {
       name: userFound.name,
       lastNameP: userFound.lastNameP,
@@ -211,7 +173,6 @@ export class AuthService {
       email: userFound.email,
       pregunta: userFound.pregunta,
       respuesta: userFound.respuesta,
-      url: userFound.url, // Incluimos la URL de la imagen
     };
   }
 
@@ -397,5 +358,24 @@ async validateToken(token: string): Promise<Auth | null> {
     }
     user.role = newRole;
     return this.authRepository.save(user);
+  }
+
+  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'auth_images' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      ).end(file.buffer);
+    });
+  }
+
+  private extractPublicId(url: string): string {
+    const parts = url.split('/');
+    const lastPart = parts[parts.length - 1];
+    const publicId = lastPart.split('.')[0];
+    return publicId;
   }
 }
