@@ -25,26 +25,38 @@ export class AuthService {
     private logsRepository: Repository<Logs>,
   ) {}
 
-  create(createAuthDto: CreateAuthDto) {
+   // Método para crear un nuevo usuario, con imagen opcional
+   async create(createAuthDto: CreateAuthDto, file?: Express.Multer.File) {
     const { password, ...resultado } = createAuthDto;
+    
+    // Si hay un archivo de imagen, lo subimos a Cloudinary
+    let imageUrl = null;
+    if (file) {
+      const uploadResult = await this.uploadImage(file);
+      imageUrl = uploadResult.secure_url; // URL segura de la imagen subida
+    }
+
     const newUser = this.authRepository.create({
       password: bcryptjs.hashSync(password, 10),
       ...resultado,
+      url: imageUrl, // Guardamos la URL de la imagen si existe
     });
     return this.authRepository.save(newUser);
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+   // Método para cargar la imagen en Cloudinary
+   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'user_images', // Personaliza el nombre de la carpeta si es necesario
+          folder: 'user_images', // Nombre de la carpeta donde se guardarán las imágenes
+          resource_type: 'auto', // Puede manejar varios tipos de archivos como imágenes y videos
         },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
         }
-      ).end(file.buffer);
+      ).end(file.buffer); // Inicia la carga con el buffer de la imagen
     });
   }
 
@@ -54,46 +66,60 @@ export class AuthService {
     };
   }
 
-  async updateById(id: number, updateAuthDto: CreateAuthDto) {
+  async updateById(id: number, updateAuthDto: CreateAuthDto, file?: Express.Multer.File) {
     try {
-        const foundUser = await this.authRepository.findOne({ where: { id } });
-        if (!foundUser) {
-            return {
-                message: 'Usuario no encontrado',
-                status: HttpStatus.NOT_FOUND,
-            };
-        }
-
-        const { ip, fecha_log, ...data } = updateAuthDto;
-        await this.authRepository.update(id, data);
-
-        console.log('Datos actualizados para el usuario:', data);
-
-        try {
-            await this.crearLogs({
-                accion: 'Se actualizó la información del usuario',
-                fecha: fecha_log,
-                ip,
-                status: HttpStatus.OK,
-                url: `auth/perfil/${id}`,
-            }, foundUser.email);
-        } catch (logError) {
-            console.error('Error al crear el log:', logError);
-        }
-
+      const foundUser = await this.authRepository.findOne({ where: { id } });
+      if (!foundUser) {
         return {
-            message: 'Usuario actualizado correctamente',
-            status: HttpStatus.OK,
+          message: 'Usuario no encontrado',
+          status: HttpStatus.NOT_FOUND,
         };
+      }
+  
+      let imageUrl: string | undefined;
+      // Si se ha proporcionado una imagen, se sube a Cloudinary
+      if (file) {
+        const uploadResult = await this.uploadImage(file);
+        imageUrl = uploadResult.secure_url; // URL de la imagen subida
+      }
+  
+      const { ip, fecha_log, ...data } = updateAuthDto;
+      // Si hay una nueva imagen, se agrega a los datos de actualización
+      if (imageUrl) {
+        data.url = imageUrl;
+      }
+  
+      await this.authRepository.update(id, data);
+  
+      console.log('Datos actualizados para el usuario:', data);
+  
+      // Registrar la actualización
+      try {
+        await this.crearLogs({
+          accion: 'Se actualizó la información del usuario',
+          fecha: fecha_log,
+          ip,
+          status: HttpStatus.OK,
+          url: `auth/perfil/${id}`,
+        }, foundUser.email);
+      } catch (logError) {
+        console.error('Error al crear el log:', logError);
+      }
+  
+      return {
+        message: 'Usuario actualizado correctamente',
+        status: HttpStatus.OK,
+      };
     } catch (error) {
-        console.error('Error en updateById:', error);
-        console.error('Full error stack:', error);
-        return {
-            message: 'Error en el servidor',
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-        };
+      console.error('Error en updateById:', error);
+      console.error('Full error stack:', error);
+      return {
+        message: 'Error en el servidor',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
     }
-}
+  }
+  
 
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
