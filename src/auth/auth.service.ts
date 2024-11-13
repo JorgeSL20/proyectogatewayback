@@ -38,7 +38,7 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'auth_images', // Personaliza el nombre de la carpeta si es necesario
+          folder: 'user_images', // Personaliza el nombre de la carpeta si es necesario
         },
         (error, result) => {
           if (error) return reject(error);
