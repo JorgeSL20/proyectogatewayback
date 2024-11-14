@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 
 @Controller('auth')
 export class AuthController {
@@ -33,10 +35,21 @@ export class AuthController {
     console.log(updateAuthDto)
     return this.authService.updatePassword(email, updateAuthDto);
   }
+  // Método para actualizar usuario por ID, incluyendo archivo
   @Patch('perfil/:id')
-  updateById(@Param('id') id: string, @Body() updateAuthDto: CreateAuthDto) {
-    console.log(updateAuthDto)
-    return this.authService.updateById(parseInt(id), updateAuthDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async updateById(
+    @Param('id') id: string,
+    @Body() updateAuthDto: CreateAuthDto,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (file) {
+      // Maneja la actualización de imagen si se proporciona un archivo
+      const result = await this.authService.updateById(parseInt(id), updateAuthDto, file);
+      return result;
+    } else {
+      throw new BadRequestException('No file uploaded');
+    }
   }
 
   @Delete(':id')

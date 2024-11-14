@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcryptjs from 'bcryptjs';
@@ -9,6 +9,7 @@ import { ValidarLogin } from './dto/ValidLoginDto-auth';
 import { CreateInformacionDto } from './dto/create-informacion.dto';
 import { CreatePreguntasDto } from './dto/create-preguntas.dto';
 import { NotFoundException } from '@nestjs/common';
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class AuthService {
@@ -32,53 +33,53 @@ export class AuthService {
     return this.authRepository.save(newUser);
   }
 
+   // Método para subir la imagen a Cloudinary en la carpeta 'user_images'
+   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'user_images' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      ).end(file.buffer);
+    });
+  }
+
   async login(user: Auth): Promise<{ token: number }> {
     return {
       token: user.id,
     };
   }
 
-  async updateById(id: number, updateAuthDto: CreateAuthDto) {
+  async updateById(id: number, updateAuthDto: CreateAuthDto, file?: Express.Multer.File) {
     try {
-        const foundUser = await this.authRepository.findOne({ where: { id } });
-        if (!foundUser) {
-            return {
-                message: 'Usuario no encontrado',
-                status: HttpStatus.NOT_FOUND,
-            };
-        }
-
-        const { ip, fecha_log, ...data } = updateAuthDto;
-        await this.authRepository.update(id, data);
-
-        console.log('Datos actualizados para el usuario:', data);
-
-        try {
-            await this.crearLogs({
-                accion: 'Se actualizó la información del usuario',
-                fecha: fecha_log,
-                ip,
-                status: HttpStatus.OK,
-                url: `auth/perfil/${id}`,
-            }, foundUser.email);
-        } catch (logError) {
-            console.error('Error al crear el log:', logError);
-        }
-
+      const foundUser = await this.authRepository.findOne({ where: { id } });
+      if (!foundUser) {
         return {
-            message: 'Usuario actualizado correctamente',
-            status: HttpStatus.OK,
+          message: 'Usuario no encontrado',
+          status: HttpStatus.NOT_FOUND,
         };
+      }
+
+      if (file) {
+        // Si se proporciona un archivo, sube la imagen
+        const result = await this.uploadImage(file);
+        updateAuthDto.url = result.secure_url; // Actualiza la URL de la imagen en el DTO
+      }
+
+      // Actualiza los datos del usuario
+      await this.authRepository.update(id, updateAuthDto);
+
+      return {
+        message: 'Usuario actualizado correctamente',
+        status: HttpStatus.OK,
+      };
     } catch (error) {
-        console.error('Error en updateById:', error);
-        console.error('Full error stack:', error);
-        return {
-            message: 'Error en el servidor',
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-        };
+      console.error('Error en updateById:', error);
+      throw new InternalServerErrorException('Error al actualizar usuario');
     }
-}
-
+  }
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
     const foundUser = await this.authRepository.findOne({
