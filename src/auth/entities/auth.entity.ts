@@ -29,7 +29,7 @@ export class Auth {
     @Column()
     respuesta: string;
 
-    @Column()
+    @Column({ default: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1731552340/user_images/user_kukjch.jpg ' })
     url: string;
 
     @Column({ nullable: true })

@@ -1,18 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto, CreateInformacionDto, CreatePreguntasDto } from './dto/create-auth.dto';
+import { CreateAuthDto,CreateInformacionDto,CreatePreguntasDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  // Usuarios
+//usuarios
   @Post()
   create(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.create(createAuthDto);
   }
+  
 
   @Get()
   findAll() {
@@ -26,16 +25,17 @@ export class AuthController {
 
   @Patch(':email')
   update(@Param('email') email: string, @Body() updateAuthDto: CreateAuthDto) {
+    console.log(updateAuthDto)
     return this.authService.update(email, updateAuthDto);
   }
-
   @Patch('password/:email')
-  updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password: string, ip: string, fecha: string}) {
+  updatePassword(@Param('email') email: string, @Body() updateAuthDto: {password:string,ip:string,fecha:string}) {
+    console.log(updateAuthDto)
     return this.authService.updatePassword(email, updateAuthDto);
   }
-
   @Patch('perfil/:id')
   updateById(@Param('id') id: string, @Body() updateAuthDto: CreateAuthDto) {
+    console.log(updateAuthDto)
     return this.authService.updateById(parseInt(id), updateAuthDto);
   }
 
@@ -43,67 +43,51 @@ export class AuthController {
   remove(@Param('id') id: string) {
     return this.authService.remove(+id);
   }
-
   @Get('user/:id')
-  getUserById(@Param('id') id: string) {
-    return this.authService.getUserById(id);
+  getUserById(@Param('id') id:string){
+    return this.authService.getUserById(id)
   }
 
-  // Informacion
+  ///INFORMACION
   @Get('informacion/:id')
-  getInformacionById(@Param('id') id: string) {
-    return this.authService.getInformacionById(id);
+  getInformacionById(@Param('id') id:string){
+    return this.authService.getInformacionById(id)
   }
-
   @Patch('informacion/:id')
   updateInformacionById(@Param('id') id: string, @Body() updateInformacionDto: CreateInformacionDto) {
     return this.authService.updateInformacionById(id, updateInformacionDto);
   }
-
-  // Pregunta
+///PREGUNTA
   @Get('preguntas/:data')
-  getPreguntas(@Param('data') data: string) {
-    return this.authService.getPreguntas();
+  getPreguntas(@Param('data')data:string){
+    return this.authService.getPreguntas()
   }
-
   @Patch('preguntas/:id')
-  updatePreguntasById(@Param('id') id: string, @Body() updatePreguntasDto: CreatePreguntasDto) {
-    return this.authService.updatePreguntasById(id, updatePreguntasDto);
-  }
+updatePreguntasById(@Param('id') id: string, @Body() updatePreguntasDto: CreatePreguntasDto) {
+  return this.authService.updatePreguntasById(id, updatePreguntasDto);
+}
+@Post('preguntas')
+createPreguntas(@Body() createPreguntasDto: CreatePreguntasDto) {
+  return this.authService.createPreguntas(createPreguntasDto);
+}
+@Delete('preguntas/:id')
+deletePregunta(@Param('id') id: string) {
+  return this.authService.deletePregunta(parseInt(id));
+}
 
-  @Post('preguntas')
-  createPreguntas(@Body() createPreguntasDto: CreatePreguntasDto) {
-    return this.authService.createPreguntas(createPreguntasDto);
-  }
 
-  @Delete('preguntas/:id')
-  deletePregunta(@Param('id') id: string) {
-    return this.authService.deletePregunta(parseInt(id));
-  }
+@Get('auth')
+getAuth() {
+  return this.authService.getAuth();
+}
 
-  @Get('auth')
-  getAuth() {
-    return this.authService.getAuth();
-  }
+@Delete('user/:email') // Define la ruta para el método deleteUser, con el parámetro email en la URL
+deleteUser(@Param('email') email: string) { // Captura el parámetro email de la URL
+  return this.authService.deleteUser(email); // Llama al método correspondiente en el servicio y pasa el email
+}
 
-  @Delete('user/:email')
-  deleteUser(@Param('email') email: string) {
-    return this.authService.deleteUser(email);
-  }
-
-  @Patch('role/:email')
-  updateRoleByEmail(@Param('email') email: string, @Body() updateRoleDto: { role: string }) {
-    return this.authService.updateRoleByEmail(email, updateRoleDto.role);
-  }
-
-  // Endpoint para subir imagenes de perfil
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-    const result = await this.authService.uploadImage(file);
-    return { secure_url: result.secure_url };
-  }
+@Patch('role/:email')
+updateRoleByEmail(@Param('email') email: string, @Body() updateRoleDto: { role: string }) {
+  return this.authService.updateRoleByEmail(email, updateRoleDto.role);
+}
 }
