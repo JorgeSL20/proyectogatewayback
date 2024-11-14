@@ -363,7 +363,7 @@ async validateToken(token: string): Promise<Auth | null> {
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: 'auth_images' },
+        { folder: 'user_images' },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
