@@ -37,24 +37,23 @@ export class AuthController {
   }
   // Método para actualizar usuario por ID, incluyendo archivo
   @Patch('perfil/:id')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: { fileSize: 10 * 1024 * 1024 }, // Limita el tamaño del archivo a 10MB
-    }),
-  )
-  async updateById(
-    @Param('id') id: string,
-    @Body() updateAuthDto: CreateAuthDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (file) {
-      // Si se proporciona un archivo, maneja la actualización de la imagen
-      const result = await this.authService.updateById(parseInt(id), updateAuthDto, file);
-      return result;
-    } else {
-      throw new BadRequestException('No file uploaded');
-    }
+@UseInterceptors(FileInterceptor('file'))
+async updateById(
+  @Param('id') id: string,
+  @Body() updateAuthDto: CreateAuthDto,
+  @UploadedFile() file: Express.Multer.File
+) {
+  if (file) {
+    // Si se proporciona un archivo, maneja la imagen
+    const result = await this.authService.updateById(parseInt(id), updateAuthDto, file);
+    return result;
+  } else {
+    // Si no se proporciona un archivo, puedes actualizar solo los datos del usuario
+    const result = await this.authService.updateById(parseInt(id), updateAuthDto);
+    return result;
   }
+}
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {
