@@ -61,25 +61,49 @@ export class AuthService {
           status: HttpStatus.NOT_FOUND,
         };
       }
-
+  
+      // Si se proporciona un archivo, sube la imagen
       if (file) {
-        // Si se proporciona un archivo, sube la imagen
         const result = await this.uploadImage(file);
         updateAuthDto.url = result.secure_url; // Actualiza la URL de la imagen en el DTO
       }
-
+  
+      // Extrae la IP y fecha del DTO (si existen) para el log
+      const { ip, fecha_log, ...data } = updateAuthDto;
+  
       // Actualiza los datos del usuario
-      await this.authRepository.update(id, updateAuthDto);
-
+      await this.authRepository.update(id, data);
+  
+      console.log('Datos actualizados para el usuario:', data);
+  
+      // Si se proporcionan datos para el log, crea un log
+      if (ip && fecha_log) {
+        try {
+          await this.crearLogs({
+            accion: 'Se actualizó la información del usuario',
+            fecha: fecha_log,
+            ip,
+            status: HttpStatus.OK,
+            url: `auth/perfil/${id}`,
+          }, foundUser.email);
+        } catch (logError) {
+          console.error('Error al crear el log:', logError);
+        }
+      }
+  
       return {
         message: 'Usuario actualizado correctamente',
         status: HttpStatus.OK,
       };
     } catch (error) {
       console.error('Error en updateById:', error);
-      throw new InternalServerErrorException('Error al actualizar usuario');
+      return {
+        message: 'Error en el servidor',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
     }
   }
+  
 
   async updatePassword(email: string, data: { password: string; ip: string; fecha: string }) {
     const foundUser = await this.authRepository.findOne({
