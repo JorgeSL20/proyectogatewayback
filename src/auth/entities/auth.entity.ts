@@ -2,6 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Logs } from './logs.entity';
 import { Carrito } from 'src/carrito/entities/carrito.entity';
 import { Pago } from 'src/pago/entities/pago.entity';
+import { Feedback } from 'src/feedback/entities/feedback.entity';
 
 @Entity({ name: 'usuarios' })
 export class Auth {
@@ -40,7 +41,10 @@ export class Auth {
 
     @Column({ default: 'user' }) // Valor por defecto 'user'
     role: string;
-    
+
+    @Column({ nullable: true }) // Nueva columna para feedback
+    feedback?: string | null;
+
     @OneToMany(() => Logs, logs => logs.usuario)
     logs: Logs[];
 
@@ -49,6 +53,9 @@ export class Auth {
 
     @OneToMany(() => Pago, pago => pago.usuario)
     pagos: Pago[];
+
+    @OneToMany(() => Feedback, (feedback) => feedback.usuario)
+feedbacks: Feedback[];
 }
 
 
