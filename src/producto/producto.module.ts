@@ -10,11 +10,10 @@ import { NotificationsModule } from 'src/websocket/notifications.module';// Impo
 @Module({
   imports: [
     TypeOrmModule.forFeature([Producto]),
-    MulterModule.register(), // Configuración de Multer
-    NotificationsModule, // Importa el módulo de notificaciones
+    MulterModule.register(),
   ],
   controllers: [ProductoController],
-  providers: [ProductoService],
+  providers: [ProductoService,NotificationsModule],
   exports: [ProductoService],
 })
 export class ProductoModule {}

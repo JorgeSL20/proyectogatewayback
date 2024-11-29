@@ -17,7 +17,7 @@ export class ProductoService {
   constructor(
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
-    private notificationsGateway: NotificationsGateway, // Inyecta el Gateway de WebSocket
+    private readonly notificationsGateway: NotificationsGateway, // Inyecta el Gateway de WebSocket
   ) {}
 
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
@@ -34,19 +34,18 @@ export class ProductoService {
     });
   }
 
-  async create(createProductoDto: CreateProductoDto): Promise<Producto> {
-    console.log('CreateProductoDto en servicio:', createProductoDto); // Log para verificar datos
+   async create(createProductoDto: CreateProductoDto) {
     const newProducto = this.productoRepository.create(createProductoDto);
     const savedProducto = await this.productoRepository.save(newProducto);
 
-    // Emite la notificación al crear un producto
-    this.notificationsGateway.server.emit('newProductNotification', {
-      message: `Nuevo producto disponible: ${savedProducto.producto}`,
+    // Emitir la notificación
+    this.notificationsGateway.sendNotification('Nuevo producto creado', {
       producto: savedProducto,
     });
 
     return savedProducto;
   }
+  
 
   async findAll(
     orderBy: string = 'fechaCreacion',
