@@ -16,10 +16,6 @@ import { ConfigModule } from '@nestjs/config';
 import { SubcategoriaModule } from './subcategoria/subcategoria.module';
 import { NotificationsGateway } from './websocket/websocket.gateway';
 
-
-
-
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,10 +33,8 @@ import { NotificationsGateway } from './websocket/websocket.gateway';
     
   }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule,NotificationsGateway],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,NotificationsGateway],
 })
-
-
 
 export class AppModule {}
  
