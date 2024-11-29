@@ -1,16 +1,23 @@
-import { Injectable, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpStatus,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+import { NotificationsGateway } from 'src/websocket/websocket.gateway'; // Asegúrate de importar el Gateway
 
 @Injectable()
 export class ProductoService {
   constructor(
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
+    private notificationsGateway: NotificationsGateway, // Inyecta el Gateway de WebSocket
   ) {}
 
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
@@ -22,7 +29,7 @@ export class ProductoService {
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
-        }
+        },
       ).end(file.buffer);
     });
   }
@@ -30,10 +37,21 @@ export class ProductoService {
   async create(createProductoDto: CreateProductoDto): Promise<Producto> {
     console.log('CreateProductoDto en servicio:', createProductoDto); // Log para verificar datos
     const newProducto = this.productoRepository.create(createProductoDto);
-    return this.productoRepository.save(newProducto);
+    const savedProducto = await this.productoRepository.save(newProducto);
+
+    // Emite la notificación al crear un producto
+    this.notificationsGateway.server.emit('newProductNotification', {
+      message: `Nuevo producto disponible: ${savedProducto.producto}`,
+      producto: savedProducto,
+    });
+
+    return savedProducto;
   }
 
-  async findAll(orderBy: string = 'fechaCreacion', order: 'ASC' | 'DESC' = 'DESC'): Promise<Producto[]> {
+  async findAll(
+    orderBy: string = 'fechaCreacion',
+    order: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<Producto[]> {
     return this.productoRepository.find({
       order: {
         [orderBy]: order,
