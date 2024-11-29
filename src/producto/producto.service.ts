@@ -10,7 +10,7 @@ import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { NotificationsGateway } from 'src/websocket/websocket.gateway'; // Asegúrate de importar el Gateway
+import { NotificationsGateway } from 'src/websocket/notifications.gateway'; // Asegúrate de importar el Gateway
 
 @Injectable()
 export class ProductoService {

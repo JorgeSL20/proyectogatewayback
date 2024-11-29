@@ -1,12 +1,5 @@
-import {
-    SubscribeMessage,
-    WebSocketGateway,
-    OnGatewayInit,
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    WebSocketServer,
-  } from '@nestjs/websockets';
-  import { Server, Socket } from 'socket.io';
+import {SubscribeMessage,WebSocketGateway,OnGatewayInit,OnGatewayConnection,OnGatewayDisconnect,WebSocketServer,} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
   
   @WebSocketGateway({
     cors: {

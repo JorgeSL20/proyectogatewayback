@@ -14,7 +14,7 @@ import { CarruselModule } from './carrusel/carrusel.module';
 import { CarritoModule } from './carrito/carrito.module';
 import { ConfigModule } from '@nestjs/config';
 import { SubcategoriaModule } from './subcategoria/subcategoria.module';
-import { NotificationsGateway } from './websocket/websocket.gateway';
+import { NotificationsGateway } from './websocket/notifications.gateway';
 
 @Module({
   imports: [
