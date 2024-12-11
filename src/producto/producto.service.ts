@@ -10,14 +10,13 @@ import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { NotificationsGateway } from 'src/websocket/notifications.gateway'; // Asegúrate de importar el Gateway
+// Asegúrate de importar el Gateway
 
 @Injectable()
 export class ProductoService {
   constructor(
     @InjectRepository(Producto)
-    private productoRepository: Repository<Producto>,
-    private readonly notificationsGateway: NotificationsGateway, // Inyecta el Gateway de WebSocket
+    private productoRepository: Repository<Producto>, // Inyecta el Gateway de WebSocket
   ) {}
 
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
@@ -37,11 +36,6 @@ export class ProductoService {
    async create(createProductoDto: CreateProductoDto) {
     const newProducto = this.productoRepository.create(createProductoDto);
     const savedProducto = await this.productoRepository.save(newProducto);
-
-    // Emitir la notificación
-    this.notificationsGateway.sendNotification('Nuevo producto creado', {
-      producto: savedProducto,
-    });
 
     return savedProducto;
   }

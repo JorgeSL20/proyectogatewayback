@@ -14,7 +14,7 @@ import { CarruselModule } from './carrusel/carrusel.module';
 import { CarritoModule } from './carrito/carrito.module';
 import { ConfigModule } from '@nestjs/config';
 import { SubcategoriaModule } from './subcategoria/subcategoria.module';
-import { NotificationsGateway } from './websocket/notifications.gateway';
+import { NotificationModule } from './Notificaciones/notification.module';
 
 @Module({
   imports: [
@@ -31,9 +31,9 @@ import { NotificationsGateway } from './websocket/notifications.gateway';
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
     
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule,NotificationsGateway],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule,NotificationModule],
   controllers: [AppController],
-  providers: [AppService,NotificationsGateway],
+  providers: [AppService],
 })
 
 export class AppModule {}
