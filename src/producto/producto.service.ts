@@ -10,30 +10,28 @@ import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { NotificationsController } from 'src/Notificaciones/notification.controller';
+import { NotificationService } from 'src/Notificaciones/notification.service'; // Cambiado para usar el servicio de notificaciones
 
 @Injectable()
 export class ProductoService {
   constructor(
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
-    private notificationsController: NotificationsController,
+    private notificationService: NotificationService, // Inyectamos el servicio de notificaciones
   ) {}
 
   // Subir imágenes a Cloudinary
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: 'producto_images',
-          },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          },
-        )
-        .end(file.buffer);
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'producto_images',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      ).end(file.buffer);
     });
   }
 
@@ -57,7 +55,7 @@ export class ProductoService {
           icon: '/assets/icons/icon-72x72.png',
         },
       };
-      this.notificationsController.sendNotification(notificationPayload);
+      await this.notificationService.sendNotification(notificationPayload); // Usamos el servicio de notificaciones
 
       return savedProducto;
     } catch (error) {
