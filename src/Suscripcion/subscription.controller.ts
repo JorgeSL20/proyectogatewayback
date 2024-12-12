@@ -1,12 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 
-@Controller('subscribe')
+@Controller('subscriptions')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 
   @Post()
-  async subscribe(@Body() body: { endpoint: string; keys: object }) {
+  async subscriptions(@Body() body: { endpoint: string; keys: object }) {
     try {
       // Guardar la suscripción en la base de datos
       const { endpoint, keys } = body;
