@@ -34,30 +34,30 @@ export class SubscriptionService {
       if (existingSubscription) {
         throw new Error('Ya existe una suscripción con este endpoint');
       }
-  
+
       // Asegúrate de que isActive sea true
       const subscription = this.subscriptionRepository.create({ endpoint, keys, isActive: true });
       return await this.subscriptionRepository.save(subscription);
     } catch (error) {
+      console.error(`Error al guardar la suscripción: ${error}`);
       throw new InternalServerErrorException(`Error al guardar la suscripción: ${error}`);
     }
   }
-  
 
   /**
    * Obtener todas las suscripciones activas
    * @returns Lista de suscripciones activas
    */
   async getSubscriptions(): Promise<Subscription[]> {
-  try {
-    const subscriptions = await this.subscriptionRepository.find({ where: { isActive: true } });
-    console.log('Suscripciones activas:', subscriptions);  // Verifica qué suscripciones se están obteniendo
-    return subscriptions;
-  } catch (error) {
-    throw new InternalServerErrorException('Error al obtener las suscripciones');
+    try {
+      const subscriptions = await this.subscriptionRepository.find({ where: { isActive: true } });
+      console.log('Suscripciones activas:', subscriptions);  // Verifica qué suscripciones se están obteniendo
+      return subscriptions;
+    } catch (error) {
+      console.error('Error al obtener las suscripciones:', error);
+      throw new InternalServerErrorException('Error al obtener las suscripciones');
+    }
   }
-}
-
 
   /**
    * Marcar una suscripción como inactiva
@@ -74,6 +74,7 @@ export class SubscriptionService {
       await this.subscriptionRepository.save(subscription);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
+      console.error('Error al desactivar la suscripción:', error);
       throw new InternalServerErrorException('Error al desactivar la suscripción');
     }
   }
@@ -106,16 +107,20 @@ export class SubscriptionService {
 
         return webPush
           .sendNotification(pushSubscription, JSON.stringify(payload))
+          .then(() => {
+            console.log(`Notificación enviada a ${subscription.endpoint}`);
+          })
           .catch((error) => {
             console.error(
               `Error al enviar la notificación a ${subscription.endpoint}:`,
-              error,
+              error
             );
           });
       });
 
       await Promise.all(notificationPromises);
     } catch (error) {
+      console.error('Error al enviar notificaciones push:', error);
       throw new InternalServerErrorException('Error al enviar notificaciones push');
     }
   }
