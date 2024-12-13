@@ -43,8 +43,8 @@ export class ProductoService {
       const payload = {
         title: '¡Nuevo producto disponible!',
         body: `El producto "${savedProducto.producto}" ya está disponible.`,
-        icon: 'https://ruta-icono.jpg',
-        url: `https://mi-sitio.com/producto/${savedProducto.id}`,
+        icon: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1734053100/user_images/imagen_logo_n3b16q.jpg',
+        url: `https://proyectogatewayback-production.up.railway.app/producto/${savedProducto.id}`,
       };
       await this.subscriptionService.sendNotification(payload);
 
