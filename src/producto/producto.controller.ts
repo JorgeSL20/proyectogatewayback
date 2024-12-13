@@ -1,3 +1,4 @@
+// producto.controller.ts
 import {
   Controller,
   Post,
@@ -13,7 +14,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ProductoService } from './producto.service';
-import { SubscriptionService } from 'src/Subcripcion/subscription.service';
+import { SubscriptionService } from 'src/Subcripcion/subscription.service';  // Asegúrate de que la ruta sea correcta
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,7 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ProductoController {
   constructor(
     private readonly productoService: ProductoService,
-    private readonly subscriptionService: SubscriptionService,
+    private readonly subscriptionService: SubscriptionService, // Asegúrate de que SubscriptionService esté aquí
   ) {}
 
   @Post()
@@ -52,7 +53,7 @@ export class ProductoController {
       };
 
       // Enviar notificaciones push
-      await this.subscriptionService.sendNotification(payload);
+      await this.subscriptionService.sendNotification(payload); // Llamamos al servicio de suscripciones
 
       return {
         message: 'Producto creado exitosamente y notificaciones enviadas',
