@@ -31,21 +31,25 @@ export class ProductoService {
   // Crear producto y enviar notificación
   async create(createProductoDto: CreateProductoDto, file?: Express.Multer.File) {
     try {
+      // Subir la imagen si se proporciona un archivo
       if (file) {
         const imageResult = await this.uploadImage(file);
-        createProductoDto.url = imageResult.secure_url;
+        createProductoDto.url = imageResult.secure_url; // Asignar la URL de la imagen a la propiedad 'url'
       }
 
+      // Crear y guardar el nuevo producto
       const newProducto = this.productoRepository.create(createProductoDto);
       const savedProducto = await this.productoRepository.save(newProducto);
 
-      // Crear y enviar notificación
+      // Crear el payload de la notificación
       const payload = {
         title: '¡Nuevo producto disponible!',
         body: `El producto "${savedProducto.producto}" ya está disponible.`,
-        icon: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1734053100/user_images/imagen_logo_n3b16q.jpg',
-        url: `https://proyectogatewayback-production.up.railway.app/producto/${savedProducto.id}`,
+        icon: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1734053100/user_images/imagen_logo_n3b16q.jpg', // Icono para la notificación
+        url: `https://proyectogatewayback-production.up.railway.app/producto/${savedProducto.id}`, // Enlace al producto
       };
+
+      // Enviar notificación a las suscripciones activas
       await this.subscriptionService.sendNotification(payload);
 
       return savedProducto;
@@ -54,11 +58,9 @@ export class ProductoService {
       throw new InternalServerErrorException('Error al crear producto');
     }
   }
+
   // Obtener todos los productos
-  async findAll(
-    orderBy: string = 'fechaCreacion',
-    order: 'ASC' | 'DESC' = 'DESC',
-  ): Promise<Producto[]> {
+  async findAll(orderBy: string = 'fechaCreacion', order: 'ASC' | 'DESC' = 'DESC'): Promise<Producto[]> {
     return this.productoRepository.find({
       order: {
         [orderBy]: order,
@@ -78,11 +80,13 @@ export class ProductoService {
   // Actualizar producto por ID
   async updateById(id: number, updateProductoDto: UpdateProductoDto, file?: Express.Multer.File) {
     try {
+      // Subir la nueva imagen si se proporciona un archivo
       if (file) {
         const result = await this.uploadImage(file);
         updateProductoDto.url = result.secure_url;
       }
 
+      // Actualizar el producto en la base de datos
       const updateResult = await this.productoRepository.update(id, { ...updateProductoDto });
       if (updateResult.affected === 0) {
         throw new BadRequestException('Producto no encontrado');
