@@ -108,16 +108,18 @@ export class SubscriptionService {
           await webPush.sendNotification(pushSubscription, JSON.stringify(payload));
           console.log(`Notificación enviada a ${subscription.endpoint}`);
         } catch (error) {
-          console.error(`Error al enviar la notificación a ${subscription.endpoint}:`, error);
-  
-          // Verifica si el error es del tipo esperado (WebPushError u objeto similar)
           if (
-            error instanceof Error && 
-            typeof (error as any).statusCode === 'number' && 
+            error instanceof Error &&
+            typeof (error as any).statusCode === 'number' &&
             (error as any).statusCode === 410
           ) {
             console.warn(`Suscripción expirada o inválida: ${subscription.endpoint}`);
-            await this.deactivateSubscription(subscription.id); // Marcar como inactiva en la base de datos
+            await this.deactivateSubscription(subscription.id); // Desactiva la suscripción
+          } else {
+            console.error(
+              `Error desconocido al enviar la notificación a ${subscription.endpoint}:`,
+              error,
+            );
           }
         }
       });
