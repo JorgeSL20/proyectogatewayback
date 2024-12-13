@@ -93,7 +93,7 @@ export class SubscriptionService {
       }
 
       webPush.setVapidDetails(
-        'kireluriel@gmail.com',
+        'mailto:kireluriel@gmail.com', // Modificado para incluir el prefijo "mailto:"
         this.vapidKeys.publicKey,
         this.vapidKeys.privateKey,
       );
