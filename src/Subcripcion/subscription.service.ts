@@ -34,25 +34,30 @@ export class SubscriptionService {
       if (existingSubscription) {
         throw new Error('Ya existe una suscripción con este endpoint');
       }
-
-      const subscription = this.subscriptionRepository.create({ endpoint, keys });
+  
+      // Asegúrate de que isActive sea true
+      const subscription = this.subscriptionRepository.create({ endpoint, keys, isActive: true });
       return await this.subscriptionRepository.save(subscription);
     } catch (error) {
       throw new InternalServerErrorException(`Error al guardar la suscripción: ${error}`);
     }
   }
+  
 
   /**
    * Obtener todas las suscripciones activas
    * @returns Lista de suscripciones activas
    */
   async getSubscriptions(): Promise<Subscription[]> {
-    try {
-      return await this.subscriptionRepository.find({ where: { isActive: true } });
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener las suscripciones');
-    }
+  try {
+    const subscriptions = await this.subscriptionRepository.find({ where: { isActive: true } });
+    console.log('Suscripciones activas:', subscriptions);  // Verifica qué suscripciones se están obteniendo
+    return subscriptions;
+  } catch (error) {
+    throw new InternalServerErrorException('Error al obtener las suscripciones');
   }
+}
+
 
   /**
    * Marcar una suscripción como inactiva
