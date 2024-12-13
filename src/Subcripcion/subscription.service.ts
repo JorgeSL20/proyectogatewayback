@@ -86,42 +86,48 @@ export class SubscriptionService {
   async sendNotification(payload: object): Promise<void> {
     try {
       const subscriptions = await this.getSubscriptions();
-
+  
       if (subscriptions.length === 0) {
         console.warn('No hay suscripciones activas para enviar notificaciones.');
         return;
       }
-
+  
       webPush.setVapidDetails(
-        'mailto:kireluriel@gmail.com', // Modificado para incluir el prefijo "mailto:"
+        'mailto:kireluriel@gmail.com',
         this.vapidKeys.publicKey,
         this.vapidKeys.privateKey,
       );
-
-      // Enviar la notificación a todas las suscripciones activas
-      const notificationPromises = subscriptions.map((subscription) => {
+  
+      const notificationPromises = subscriptions.map(async (subscription) => {
         const pushSubscription = {
           endpoint: subscription.endpoint,
           keys: subscription.keys,
         };
-
-        return webPush
-          .sendNotification(pushSubscription, JSON.stringify(payload))
-          .then(() => {
-            console.log(`Notificación enviada a ${subscription.endpoint}`);
-          })
-          .catch((error) => {
-            console.error(
-              `Error al enviar la notificación a ${subscription.endpoint}:`,
-              error
-            );
-          });
+  
+        try {
+          await webPush.sendNotification(pushSubscription, JSON.stringify(payload));
+          console.log(`Notificación enviada a ${subscription.endpoint}`);
+        } catch (error) {
+          console.error(`Error al enviar la notificación a ${subscription.endpoint}:`, error);
+  
+          // Verifica si el error es del tipo esperado (WebPushError u objeto similar)
+          if (
+            error instanceof Error && 
+            typeof (error as any).statusCode === 'number' && 
+            (error as any).statusCode === 410
+          ) {
+            console.warn(`Suscripción expirada o inválida: ${subscription.endpoint}`);
+            await this.deactivateSubscription(subscription.id); // Marcar como inactiva en la base de datos
+          }
+        }
       });
-
+  
       await Promise.all(notificationPromises);
     } catch (error) {
       console.error('Error al enviar notificaciones push:', error);
       throw new InternalServerErrorException('Error al enviar notificaciones push');
     }
   }
+  
+
 }
