@@ -14,7 +14,6 @@ import { CarruselModule } from './carrusel/carrusel.module';
 import { CarritoModule } from './carrito/carrito.module';
 import { ConfigModule } from '@nestjs/config';
 import { SubcategoriaModule } from './subcategoria/subcategoria.module';
-import { NotificationModule } from './Notificaciones/notification.module';
 import { SubscriptionModule } from './Subcripcion/subcriptions.module';
 
 @Module({
@@ -32,7 +31,7 @@ import { SubscriptionModule } from './Subcripcion/subcriptions.module';
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true,
     
-  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule,NotificationModule,SubscriptionModule],
+  }), AuthModule, EmailModule, LoginModule, RecuperarPassModule, ProductoModule, MarcaModule, CategoriaModule, CarruselModule,CarritoModule, UbicacionModule, SubcategoriaModule,SubscriptionModule],
   controllers: [AppController],
   providers: [AppService],
 })

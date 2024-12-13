@@ -1,32 +1,25 @@
-import {
-  Injectable,
-  HttpStatus,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { NotificationService } from 'src/Notificaciones/notification.service';// Cambiado para usar el servicio de notificaciones
+import { SubscriptionService } from 'src/Subcripcion/subscription.service';
 
 @Injectable()
 export class ProductoService {
   constructor(
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
-    private notificationService: NotificationService, // Inyectamos el servicio de notificaciones
+    private subscriptionService: SubscriptionService, // Servicio para manejar suscripciones y notificaciones
   ) {}
 
   // Subir imágenes a Cloudinary
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        {
-          folder: 'producto_images',
-        },
+        { folder: 'producto_images' },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
@@ -39,7 +32,6 @@ export class ProductoService {
   async create(createProductoDto: CreateProductoDto, file?: Express.Multer.File) {
     try {
       if (file) {
-        // Manejar la imagen si se sube
         const imageResult = await this.uploadImage(file);
         createProductoDto.url = imageResult.secure_url;
       }
@@ -47,15 +39,14 @@ export class ProductoService {
       const newProducto = this.productoRepository.create(createProductoDto);
       const savedProducto = await this.productoRepository.save(newProducto);
 
-      // Enviar notificación
-      const notificationPayload = {
-        notification: {
-          title: 'Nuevo producto agregado',
-          body: `Producto: ${savedProducto.producto}`,
-          icon: '/assets/icons/icon-72x72.png',
-        },
+      // Crear y enviar notificación
+      const payload = {
+        title: '¡Nuevo producto disponible!',
+        body: `El producto "${savedProducto.producto}" ya está disponible.`,
+        icon: 'https://ruta-icono.jpg',
+        url: `https://mi-sitio.com/producto/${savedProducto.id}`,
       };
-      await this.notificationService.sendNotification(notificationPayload); // Usamos el servicio de notificaciones
+      await this.subscriptionService.sendNotification(payload);
 
       return savedProducto;
     } catch (error) {
@@ -63,7 +54,6 @@ export class ProductoService {
       throw new InternalServerErrorException('Error al crear producto');
     }
   }
-
   // Obtener todos los productos
   async findAll(
     orderBy: string = 'fechaCreacion',
