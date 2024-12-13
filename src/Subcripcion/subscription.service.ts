@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import * as webPush from 'web-push';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscription } from './entities/subscription.entity';
@@ -9,6 +14,13 @@ export class SubscriptionService {
     @InjectRepository(Subscription)
     private readonly subscriptionRepository: Repository<Subscription>,
   ) {}
+
+  // Configura las claves VAPID
+  private readonly vapidKeys = {
+    publicKey:
+      'BFPLtdosCNKQUZOc1bmEJFWdwikcUhovdCEx4FgNdJbbOohGoOkGlGsHWAWNp9sTNGiUy42ICsOd_x0Jksclp9M',
+    privateKey: 'qr6XhIDr_ITFiFc8YB9LuoE2jh7_ociWcejXE3c28xI',
+  };
 
   /**
    * Guardar una nueva suscripción
@@ -58,6 +70,48 @@ export class SubscriptionService {
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error al desactivar la suscripción');
+    }
+  }
+
+  /**
+   * Enviar notificaciones push a todas las suscripciones activas
+   * @param payload - Datos de la notificación (título, cuerpo, etc.)
+   */
+  async sendNotification(payload: object): Promise<void> {
+    try {
+      const subscriptions = await this.getSubscriptions();
+
+      if (subscriptions.length === 0) {
+        console.warn('No hay suscripciones activas para enviar notificaciones.');
+        return;
+      }
+
+      webPush.setVapidDetails(
+        'kireluriel@gmail.com',
+        this.vapidKeys.publicKey,
+        this.vapidKeys.privateKey,
+      );
+
+      // Enviar la notificación a todas las suscripciones activas
+      const notificationPromises = subscriptions.map((subscription) => {
+        const pushSubscription = {
+          endpoint: subscription.endpoint,
+          keys: subscription.keys,
+        };
+
+        return webPush
+          .sendNotification(pushSubscription, JSON.stringify(payload))
+          .catch((error) => {
+            console.error(
+              `Error al enviar la notificación a ${subscription.endpoint}:`,
+              error,
+            );
+          });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al enviar notificaciones push');
     }
   }
 }
