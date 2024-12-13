@@ -27,45 +27,62 @@ export class ProductoController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async create(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() createProductoDto: CreateProductoDto,
-  ) {
-    try {
-      if (!file) {
-        throw new BadRequestException('No file uploaded');
-      }
+@UseInterceptors(FileInterceptor('file'))
+async create(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() createProductoDto: CreateProductoDto,
+) {
+  try {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
 
-      // Subir imagen y obtener URL
-      const result = await this.productoService.uploadImage(file);
-      createProductoDto.url = result.secure_url;
+    // Subir imagen y obtener URL
+    const result = await this.productoService.uploadImage(file);
+    createProductoDto.url = result.secure_url;
+    console.log('Imagen subida con éxito', result.secure_url);
 
-      // Crear producto en base de datos
-      const nuevoProducto = await this.productoService.create(createProductoDto);
+    // Crear producto en base de datos
+    const nuevoProducto = await this.productoService.create(createProductoDto);
+    console.log('Producto creado con éxito', nuevoProducto);
 
-      // Crear payload de notificación
-      const payload = {
-        title: '¡Nuevo producto disponible!',
-        body: `El producto "${nuevoProducto.producto}" ya está disponible.`,
-        icon: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1734053100/user_images/imagen_logo_n3b16q.jpg ',
-        url: `https://proyectogatewayback-production.up.railway.app/producto/${nuevoProducto.id}`,
-      };
+    // Crear payload de notificación
+    const payload = {
+      title: '¡Nuevo producto disponible!',
+      body: `El producto "${nuevoProducto.producto}" ya está disponible.`,
+      icon: 'https://res.cloudinary.com/dkwb9vcbb/image/upload/v1734053100/user_images/imagen_logo_n3b16q.jpg ',
+      url: `https://proyectogatewayback-production.up.railway.app/producto/${nuevoProducto.id}`,
+    };
 
-      // Enviar notificaciones push
-      await this.subscriptionService.sendNotification(payload); // Llamamos al servicio de suscripciones
+    // Verificar suscripciones activas
+    const subscriptions = await this.subscriptionService.getSubscriptions();
+    console.log(`Número de suscripciones activas: ${subscriptions.length}`);
 
+    if (subscriptions.length === 0) {
+      console.warn('No hay suscripciones activas para enviar notificaciones.');
       return {
-        message: 'Producto creado exitosamente y notificaciones enviadas',
+        message: 'Producto creado, pero no hay suscripciones activas para notificaciones.',
         producto: nuevoProducto,
       };
-    } catch (error) {
-      throw new HttpException(
-        { message: 'Error al crear producto', error: error },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
+
+    // Enviar notificaciones push
+    await this.subscriptionService.sendNotification(payload); // Llamamos al servicio de suscripciones
+    console.log('Notificación enviada con éxito');
+
+    return {
+      message: 'Producto creado exitosamente y notificaciones enviadas',
+      producto: nuevoProducto,
+    };
+  } catch (error) {
+    console.error('Error al crear producto:', error);
+    throw new HttpException(
+      { message: 'Error al crear producto', error: error },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
+}
+
 
   @Get()
   async findAll() {

@@ -10,7 +10,7 @@ import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { NotificationService } from 'src/Notificaciones/notification.service'; // Cambiado para usar el servicio de notificaciones
+import { NotificationService } from 'src/Notificaciones/notification.service';// Cambiado para usar el servicio de notificaciones
 
 @Injectable()
 export class ProductoService {
